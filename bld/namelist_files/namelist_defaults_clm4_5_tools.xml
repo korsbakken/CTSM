@@ -131,6 +131,13 @@ attributes from the config_cache.xml file (with keys converted to upper-case).
 <scripgriddata hgrid="tx1v1"      lmask="tx1v1"     >/glade/proj3/cseg/mapping/grids/tx1v1_090122.nc</scripgriddata>
 <scripgriddata hgrid="tx0.1v2"    lmask="tx0.1v2"   >/glade/proj3/cseg/mapping/grids/tx0.1v2_090127.nc</scripgriddata>
 
+<!-- JIK 2020-11-23: Added cic0.5res and Fennoscandia0.05x0.1 SCRIP files -->
+<scripgriddata hgrid="cic0.5res"  lmask="nomask"    >cicero_mods/lnd/clm2/mappingdata/grids/SCRIPgrid_cic0.5res_nomask_c190813.nc</scripgriddata>
+<scripgriddata hgrid="Fennoscandia0.05x0.1"  lmask="USGS">cicero_mods/lnd/clm2/mappingdata/grids/SCRIPgrid_Fennoscandia0.05x0.1_lndmask_c200217.nc</scripgriddata>
+<scripgriddata hgrid="Fennoscandia0.05x0.1"  lmask="nomask">cicero_mods/lnd/clm2/mappingdata/grids/SCRIPgrid_Fennoscandia0.05x0.1_nomask_c200217.nc</scripgriddata>
+<!-- END JIK 2020-11-23 -->
+
+
 <!-- land masks for different types of mksurfdata_map input files -->
 <lmask type="lak"              >MODIS-wCsp</lmask>
 <lmask type="wet"              >AVHRR</lmask>
