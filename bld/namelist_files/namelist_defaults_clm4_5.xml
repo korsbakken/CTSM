@@ -817,6 +817,12 @@ lnd/clm2/surfdata_map/landuse.timeseries_ne30np4_hist_16pfts_Irrig_CMIP6_simyr18
 <fsurdat hgrid="0.9x1.25"     sim_year="PtVg" use_crop=".false." irrigate=".false."
 >lnd/clm2/surfdata_map/surfdata_0.9x1.25_hist_16pfts_nourb_CMIP6_simyrPtVg_c181114.nc</fsurdat>
 
+<!-- JIK 2020-11-23: Added fsurdat for cic0.5res. Fennoscandia0.05x0.1 to be added -->
+<fsurdat hgrid="cic0.5res"    sim_year="2000" use_crop=".true." >
+cicero_mods/lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pfts_CMIP6_simyr2005_c190826.nc</fsurdat>
+<!-- END JIK 2020-11-23 -->
+
+
 <!-- Dynamic PFT surface datasets (relative to {csmdata}) -->
 
 <flanduse_timeseries hgrid="0.9x1.25"      sim_year_range="1850-2000" irrigate=".true."
