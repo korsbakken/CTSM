@@ -1831,41 +1831,41 @@ cicero_mods/lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pf
 
 <!-- JIK 2021-02-20: Added mapping files for Fennoscandia0.05x0.1 -->
 
-<map frm_hgrid="0.5x0.5"  frm_lmask="MODIS"      to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask" 
+<map frm_hgrid="0.5x0.5"  frm_lmask="MODIS"      to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_0.5x0.5_MODIS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="0.25x0.25"  frm_lmask="MODIS"  to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask" 
+<map frm_hgrid="0.25x0.25"  frm_lmask="MODIS"  to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_0.25x0.25_MODIS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="0.5x0.5"  frm_lmask="AVHRR"      to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask" 
+<map frm_hgrid="0.5x0.5"  frm_lmask="AVHRR"      to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_0.5x0.5_AVHRR_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="10x10min" frm_lmask="nomask"     to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="10x10min" frm_lmask="nomask"     to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_10x10min_nomask_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="5x5min"   frm_lmask="IGBP-GSDP"  to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="5x5min"   frm_lmask="IGBP-GSDP"  to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_5x5min_IGBP-GSDP_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="5x5min"   frm_lmask="nomask"     to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="5x5min"   frm_lmask="nomask"     to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_5x5min_nomask_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="5x5min"   frm_lmask="ISRIC-WISE" to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="5x5min"   frm_lmask="ISRIC-WISE" to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_5x5min_ISRIC-WISE_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="5x5min"    frm_lmask="ORNL-Soil" to_hgrid="Fennoscandia0.05x0.1_nomask" to_lmask="nomask"
+<map frm_hgrid="5x5min"    frm_lmask="ORNL-Soil" to_hgrid="Fennoscandia0.05x0.1" to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_5x5min_ORNL-Soil_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"   frm_lmask="MODIS"      to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="3x3min"   frm_lmask="MODIS"      to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_MODIS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"    frm_lmask="MODISv2"     to_hgrid="Fennoscandia0.05x0.1_nomask" to_lmask="nomask" 
+<map frm_hgrid="3x3min"    frm_lmask="MODISv2"     to_hgrid="Fennoscandia0.05x0.1" to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_MODISv2_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"   frm_lmask="MODIS-wCsp" to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="3x3min"   frm_lmask="MODIS-wCsp" to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_MODIS-wCsp_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"   frm_lmask="USGS"       to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask"
+<map frm_hgrid="3x3min"   frm_lmask="USGS"       to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_USGS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"   frm_lmask="LandScan2004" to_hgrid="Fennoscandia0.05x0.1_nomask" to_lmask="nomask"
+<map frm_hgrid="3x3min"   frm_lmask="LandScan2004" to_hgrid="Fennoscandia0.05x0.1" to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_LandScan2004_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"   frm_lmask="GLOBE-Gardner" to_hgrid="Fennoscandia0.05x0.1_nomask" to_lmask="nomask"
+<map frm_hgrid="3x3min"   frm_lmask="GLOBE-Gardner" to_hgrid="Fennoscandia0.05x0.1" to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_GLOBE-Gardner_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="3x3min"   frm_lmask="GLOBE-Gardner-mergeGIS" to_hgrid="Fennoscandia0.05x0.1_nomask" to_lmask="nomask"
+<map frm_hgrid="3x3min"   frm_lmask="GLOBE-Gardner-mergeGIS" to_hgrid="Fennoscandia0.05x0.1" to_lmask="nomask"
 >lnd/clm2/mappingdata/maps/360x720/map_3x3min_GLOBE-Gardner-mergeGIS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="0.9x1.25"    frm_lmask="GRDC"  to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask" 
+<map frm_hgrid="0.9x1.25"    frm_lmask="GRDC"  to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_0.9x1.25_GRDC_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="360x720cru"    frm_lmask="cruncep"  to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask" 
+<map frm_hgrid="360x720cru"    frm_lmask="cruncep"  to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_360x720_cruncep_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
-<map frm_hgrid="1km-merge-10min"    frm_lmask="HYDRO1K-merge-nomask"  to_hgrid="Fennoscandia0.05x0.1_nomask"   to_lmask="nomask" 
+<map frm_hgrid="1km-merge-10min"    frm_lmask="HYDRO1K-merge-nomask"  to_hgrid="Fennoscandia0.05x0.1"   to_lmask="nomask" 
 >lnd/clm2/mappingdata/maps/360x720/map_1km-merge-10min_HYDRO1K-merge-nomask_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc</map>
 
 <!-- END JIK 2021-02-20 -->
