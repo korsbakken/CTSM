@@ -744,7 +744,7 @@ lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_1x1_brazil_hist_16pfts_Irrig_CM
 <!-- Crop surface datasets -->
 <!-- JIK 2021-02-19: Added cic05.res surfdata -->
 <fsurdat hgrid="cic05.res"  sim_year="2000" use_crop=".true." >
-lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pfts_CMIP6_simyr2005_c190826.nc</surdat>
+lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pfts_CMIP6_simyr2005_c190826.nc</fsurdat>
 <!-- END JIK 2021-02-19 -->
 <fsurdat hgrid="0.9x1.25"  sim_year="2000" use_crop=".true." >
 lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_0.9x1.25_hist_78pfts_CMIP6_simyr2000_c190214.nc</fsurdat>
