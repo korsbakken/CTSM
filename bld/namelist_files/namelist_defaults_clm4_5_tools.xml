@@ -133,8 +133,13 @@ attributes from the config_cache.xml file (with keys converted to upper-case).
 
 <!-- JIK 2020-11-23: Added cic0.5res and Fennoscandia0.05x0.1 SCRIP files -->
 <scripgriddata hgrid="cic0.5res"  lmask="nomask"    >cicero_mods/lnd/clm2/mappingdata/grids/SCRIPgrid_cic0.5res_nomask_c190813.nc</scripgriddata>
+<!-- JIK 2021-02-21: Commented out USGS mask file, in case it is interfering with creating data files (didn't specify mapping files for it) -->
+<!--
 <scripgriddata hgrid="Fennoscandia0.05x0.1"  lmask="USGS">cicero_mods/lnd/clm2/mappingdata/grids/SCRIPgrid_Fennoscandia0.05x0.1_lndmask_c200217.nc</scripgriddata>
+-->
+<!-- END JIK 2021-02-21 -->
 <scripgriddata hgrid="Fennoscandia0.05x0.1"  lmask="nomask">cicero_mods/lnd/clm2/mappingdata/grids/SCRIPgrid_Fennoscandia0.05x0.1_nomask_c200217.nc</scripgriddata>
+<scripgriddata_lrgfile_needed hgrid="Fennoscandia0.05x0.1"  lmask="nomask">64bit_offset</scripgriddata_lrgfile_needed>
 <!-- END JIK 2020-11-23 -->
 
 
@@ -321,6 +326,11 @@ attributes from the config_cache.xml file (with keys converted to upper-case).
 <mksrf_fvegtyp hgrid="3x3min" ssp_rcp="hist" sim_year="2005" crop="on"
 >lnd/clm2/rawdata/pftcftdynharv.0.05x0.05.LUH2.histsimyr2005.c190116/mksrf_landuse_clm52deg005_histLUH2_2005.c190119.nc
 </mksrf_fvegtyp>
+<!-- JIK 2021-02-21: Copied vegtyp file for sim_year=2005 to sim_year=2000, to try to debug errors when running mksurfdata.pl -->
+<!-- <mksrf_fvegtyp hgrid="3x3min" ssp_rcp="hist" sim_year="2000" crop="on"
+>lnd/clm2/rawdata/pftcftdynharv.0.05x0.05.LUH2.histsimyr2005.c190116/mksrf_landuse_clm52deg005_histLUH2_2005.c190119.nc
+</mksrf_fvegtyp> -->
+<!-- END JIK 2021-02-21 -->
 
 
 <!-- Last millenium Historical period from 0850 to 1849 -->
