@@ -1,0 +1,90 @@
+CSMDATA is /cluster/projects/nn9188k/cesm2.0/inputdata 
+resolution: Fennoscandia0.05x0.1 ssp_rcp=hist sim_year = 2005
+namelist: surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221.namelist
+&clmexp
+ nglcec           = 10
+ mksrf_fgrid      = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_MODISv2_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fpft         = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_MODISv2_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fglacier     = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_GLOBE-Gardner_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fglacierregion = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_10x10min_nomask_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fsoicol      = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_MODISv2_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_furban       = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_LandScan2004_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fmax         = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_USGS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_forganic     = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_5x5min_ISRIC-WISE_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_flai         = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_MODISv2_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fharvest     = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_0.25x0.25_MODIS_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_flakwat      = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_3x3min_MODIS-wCsp_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fwetlnd      = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_0.5x0.5_AVHRR_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fvocef       = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_0.5x0.5_AVHRR_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fsoitex      = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_5x5min_IGBP-GSDP_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_furbtopo     = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_10x10min_nomask_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fgdp         = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_0.5x0.5_AVHRR_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fpeat        = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_0.5x0.5_AVHRR_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fsoildepth   = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_5x5min_ORNL-Soil_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ map_fabm         = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_0.5x0.5_AVHRR_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ mksrf_fsoitex    = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_soitex.10level.c010119.nc'
+ mksrf_forganic   = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_organic_10level_5x5min_ISRIC-WISE-NCSCD_nlev7_c120830.nc'
+ mksrf_flakwat    = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_LakePnDepth_3x3min_simyr2004_csplk_c151015.nc'
+ mksrf_fwetlnd    = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_lanwat.050425.nc'
+ mksrf_fmax       = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_fmax_3x3min_USGS_c120911.nc'
+ mksrf_fglacier   = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_glacier_3x3min_simyr2000.c120926.nc'
+ mksrf_fglacierregion = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_GlacierRegion_10x10min_nomask_c170616.nc'
+ mksrf_fvocef     = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_vocef_0.5x0.5_simyr2000.c110531.nc'
+ mksrf_furbtopo   = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_topo.10min.c080912.nc'
+ mksrf_fgdp       = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_gdp_0.5x0.5_AVHRR_simyr2000.c130228.nc'
+ mksrf_fpeat      = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_peatf_0.5x0.5_AVHRR_simyr2000.c130228.nc'
+ mksrf_fsoildepth = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksf_soilthk_5x5min_ORNL-Soil_simyr1900-2015_c170630.nc'
+ mksrf_fabm       = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_abm_0.5x0.5_AVHRR_simyr2000.c130201.nc'
+ outnc_double   = .true.
+ all_urban      = .false.
+ no_inlandwet   = .true.
+ mksrf_furban   = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_urban_0.05x0.05_simyr2000.c120621.nc'
+ gitdescribe    = 'release-clm5.0.30-8-g167d9047
+/cluster/home/janko/cesm/cesm2.1.2-git/components/clm/tools/mksurfdata_map'
+ map_ftopostats   = '/cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/maps/Fennoscandia0.05x0.1/map_1km-merge-10min_HYDRO1K-merge-nomask_to_Fennoscandia0.05x0.1_nomask_aave_da_c201123.nc'
+ mksrf_ftopostats = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/mksrf_topostats_1km-merge-10min_HYDRO1K-merge-nomask_simyr2000.c130402.nc'
+ mksrf_fvegtyp  = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/pftcftdynharv.0.05x0.05.LUH2.histsimyr2005.c190116/mksrf_landuse_clm52deg005_histLUH2_2005.c190119.nc'
+ mksrf_fhrvtyp  = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/pftcftdynharv.0.25x0.25.LUH2.histsimyr1850-2015.c170629/mksrf_landuse_histclm50_LUH2_2005.c170629.nc'
+ mksrf_fsoicol  = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/pftcftdynharv.0.05x0.05.LUH2.histsimyr2005.c190116/mksrf_soilcolor_histclm52deg005_earthstatmirca_2005.c190116.nc'
+ mksrf_flai     = '/cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/pftcftdynharv.0.05x0.05.LUH2.histsimyr2005.c190116/mksrf_lai_histclm52deg005_earthstatmirca_2005.c190119.nc'
+ fsurdat        = 'surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221.nc'
+ fsurlog        = 'surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221.log'
+ mksrf_fdynuse  = ''
+ fdyndat        = ''
+ numpft = 16
+/
+./mksurfdata_map < surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221.namelist
+ Attempting to initialize control settings .....
+ Attempting to create surface boundary data .....
+------------------------------------------------------------
+ mksrf_fgrid = 
+ /cluster/projects/nn9188k/cesm2.0/inputdata/cicero_mods/lnd/clm2/mappingdata/ma
+ ps/Fennoscandia0.05x0.1/map_3x3min_MODISv2_to_Fennoscandia0.05x0.1_nomask_aave_
+ da_c201123.nc                                                                  
+                    
+ mksrf_gridtype = global
+ Output ALL data in file as 64-bit
+ Set wetland to 0% over land
+In mkpftMod::mkpftInit()...
+ calling domain_read
+ finished domain_read
+ fsurdat is 2d lat/lon grid
+ nlon=          280  nlat=          340
+ (OPNFIL): Successfully opened file 
+ surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221.log
+  on unit=           99
+ mksrf_gridtype = global
+ 
+In mkpftMod::mkpft()...
+ Attempting to make PFTs .....
+ Creating surface datasets with the standard # of PFTs =          16
+ domain_read_dims_2d read lon and lat dims from lon/lat
+ domain_read initialized domain
+ domain_read read LANDFRAC
+ domain_read read LANDMASK
+ Open PFT file: 
+ /cluster/projects/nn9188k/cesm2.0/inputdata/lnd/clm2/rawdata/pftcftdynharv.0.05
+ x0.05.LUH2.histsimyr2005.c190116/mksrf_landuse_clm52deg005_histLUH2_2005.c19011
+ 9.nc
+ mkpftMod::mkpft()                WARNING: using a crop input raw dataset for a 
+ non-crop output surface dataset

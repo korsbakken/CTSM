@@ -1,0 +1,1 @@
+** trouble getting vegtyp file with: ./../../bld/queryDefaultNamelist.pl -csmdata /cluster/projects/nn9188k/cesm2.0/inputdata -silent -justvalue -onlyfiles -phys clm4_5  -res 3x3min -options sim_year='2000',crop='on' -var mksrf_fvegtyp -namelist clmexp
