@@ -738,18 +738,18 @@ lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_5x5_amazon_hist_16pfts_Irrig_CM
 lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_1x1_brazil_hist_16pfts_Irrig_CMIP6_simyr2000_c190214.nc</fsurdat>
 
 <!-- Needed for SCAM (Single Column Atmosphere Model) -->
-<fsurdat hgrid="64x128"      sim_year="2000" use_crop=".false." irrigate=".true."
->lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_64x128_hist_16pfts_Irrig_CMIP6_simyr2000_c190214.nc</fsurdat>
+<fsurdat hgrid="64x128"      sim_year="2000" use_crop=".false." irrigate=".true." >
+lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_64x128_hist_16pfts_Irrig_CMIP6_simyr2000_c190214.nc</fsurdat>
 
-<!-- JIK 2021-02-22: Added Fennoscandia0.05x0.1 16pft surfdata (for use without crop module).
-     NB! Note that this file was generated from a high-resolution raw data set, which is mainly
-     intended for use *with* the crop module. Should hopefully not matter, but updated raw data sets
-     intended specifically for 16pft use do not appear to be available at the required resolution.
-     This and the corresponding 78pft surfdat file exist in versions both with and without inland wetlands
-     (without appears to be the standard elsewhere in CLM5.0). The file below is symlinked to one of
-     them. To change, change the symlink, or alter the lnd_in input list file for your case to point
-     directly to the desired version. -->
-<fsurdat hgrid="Fennoscandia0.05x0.1"  sim_year="2000" use_crop=".false." >
+     <!-- JIK 2021-02-22: Added Fennoscandia0.05x0.1 16pft surfdata (for use without crop module). -->
+     <!-- NB! Note that this file was generated from a high-resolution raw data set, which is mainly -->
+     <!-- intended for use *with* the crop module. Should hopefully not matter, but updated raw data sets -->
+     <!-- intended specifically for 16pft use do not appear to be available at the required resolution. -->
+     <!-- This and the corresponding 78pft surfdat file exist in versions both with and without inland wetlands -->
+     <!-- (without appears to be the standard elsewhere in CLM5.0). The file below is symlinked to one of -->
+     <!-- them. To change, change the symlink, or alter the lnd_in input list file for your case to point -->
+     <!-- directly to the desired version. -->
+<fsurdat hgrid="Fennoscandia0.05x0.1"  sim_year="2000" use_crop=".false.">
 lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221</fsurdat>
 <!-- END JIK 2021-02-22 -->
 
@@ -762,7 +762,6 @@ lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pfts_CMIP6_sim
 <fsurdat hgrid="Fennoscandia0.05x0.1"  sim_year="2000" use_crop=".true." >
 lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_Fennoscandia0.05x0.1_hist_78pfts_CMIP6_simyr2005_c210221.nc</fsurdat>
 <!-- END JIK 2021-02-22 -->
-<fsurdat hgrid="0.9x1.25"  sim_year="2000" use_crop=".true." >
 <fsurdat hgrid="0.9x1.25"  sim_year="2000" use_crop=".true." >
 lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_0.9x1.25_hist_78pfts_CMIP6_simyr2000_c190214.nc</fsurdat>
 <fsurdat hgrid="1.9x2.5"   sim_year="2000" use_crop=".true." >
