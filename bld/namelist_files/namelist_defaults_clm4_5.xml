@@ -750,7 +750,7 @@ lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_64x128_hist_16pfts_Irrig_CMIP6_
      <!-- them. To change, change the symlink, or alter the lnd_in input list file for your case to point -->
      <!-- directly to the desired version. -->
 <fsurdat hgrid="Fennoscandia0.05x0.1"  sim_year="2000" use_crop=".false.">
-cicero_mods/lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221</fsurdat>
+cicero_mods/lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_Fennoscandia0.05x0.1_hist_16pfts_Irrig_CMIP6_simyr2005_c210221.nc</fsurdat>
 <!-- END JIK 2021-02-22 -->
 
 <!-- Crop surface datasets -->
@@ -760,7 +760,7 @@ cicero_mods/lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pf
 <!-- END JIK 2021-02-19 -->
 <!-- JIK 2021-02-22: Added Fennoscandia0.05x0.1 surfdata. See notes for corresponding 16pft dataset above. -->
 <fsurdat hgrid="Fennoscandia0.05x0.1"  sim_year="2000" use_crop=".true." >
-lcicero_mods/nd/clm2/surfdata_map/release-clm5.0.18/surfdata_Fennoscandia0.05x0.1_hist_78pfts_CMIP6_simyr2005_c210221.nc</fsurdat>
+cicero_mods/lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_Fennoscandia0.05x0.1_hist_78pfts_CMIP6_simyr2005_c210221.nc</fsurdat>
 <!-- END JIK 2021-02-22 -->
 <fsurdat hgrid="0.9x1.25"  sim_year="2000" use_crop=".true." >
 lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_0.9x1.25_hist_78pfts_CMIP6_simyr2000_c190214.nc</fsurdat>
