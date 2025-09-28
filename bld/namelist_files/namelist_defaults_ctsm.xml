@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <?xml version="1.0"?>
 
 <?xml-stylesheet type="text/xsl" href="namelist_defaults.xsl"?>
@@ -862,6 +863,9 @@ attributes from the config_cache.xml file (with keys converted to upper-case).
 </init_interp_attributes>
 <init_interp_attributes sim_year="1850" use_cndv=".false." use_fates=".false." phys="clm6_0"
 >hgrid=0.9x1.25 maxpft=79 mask=gx1v7 use_cn=.true. use_crop=.true. irrigate=.false. glc_nex=10 do_transient_pfts=.false. lnd_tuning_mode=clm6_0_CRUJRA2024 use_excess_ice=.true.
+</init_interp_attributes>
+<init_interp_attributes sim_year="1850" use_cndv=".false." use_fates=".false." phys="clm6_0"
+>hgrid=0.9x1.25 maxpft=79 mask=gx1v7 use_cn=.true. use_crop=.true. irrigate=.false. glc_nex=10 do_transient_pfts=.false. lnd_tuning_mode=clm6_0_CRUJRA3v0 use_excess_ice=.true.
 </init_interp_attributes>
 
 <init_interp_attributes sim_year="1850" use_cndv=".false." use_fates=".false." phys="clm6_0"
@@ -2376,6 +2380,8 @@ lnd/clm2/surfdata_esmf/NEON/ctsm5.3.0/surfdata_1x1_NEON_TOOL_hist_2000_78pfts_c2
 <stream_fldfilename_zendersoilerod dust_emis_method="Zender_2003" zender_soil_erod_source="lnd" lnd_tuning_mode="clm6_0_GSWP3v1"
 >lnd/clm2/dustemisdata/dst_source2x2tunedcam6-2x2-forCLM_cdf5_c230312.nc</stream_fldfilename_zendersoilerod>
 <stream_fldfilename_zendersoilerod dust_emis_method="Zender_2003" zender_soil_erod_source="lnd" lnd_tuning_mode="clm6_0_CRUJRA2024"
+>lnd/clm2/dustemisdata/dst_source2x2tunedcam6-2x2-forCLM_cdf5_c230312.nc</stream_fldfilename_zendersoilerod>
+<stream_fldfilename_zendersoilerod dust_emis_method="Zender_2003" zender_soil_erod_source="lnd" lnd_tuning_mode="clm6_0_CRUJRA3v0"
 >lnd/clm2/dustemisdata/dst_source2x2tunedcam6-2x2-forCLM_cdf5_c230312.nc</stream_fldfilename_zendersoilerod>
 
 <stream_meshfile_zendersoilerod dust_emis_method="Zender_2003" zender_soil_erod_source="lnd"
