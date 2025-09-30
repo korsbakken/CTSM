@@ -114,3 +114,6 @@ Depends
 # Docs build output
 _build*/
 
+# pixi environments
+.pixi/*
+!.pixi/config.toml

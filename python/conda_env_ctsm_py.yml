@@ -19,8 +19,10 @@ dependencies:
   - pip=25.0.1
 
   # For building docs
-  - pip:
-    - -r ../doc/ctsm-docs_container/requirements.txt
+  # JIK 2025-09-30: Commenting out the pip section below, not understood by
+  # `pixi import`. Will install separately.
+  # - pip:
+  #   - -r ../doc/ctsm-docs_container/requirements.txt
 
   # Used in ctsm_postprocessing repo
   - pytest=8.3.5
