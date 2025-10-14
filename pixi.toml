@@ -32,3 +32,9 @@ sphinx = ">=8.2.3, <9"
 sphinxcontrib-programoutput = ">=0.18, <0.19"
 sphinx-mdinclude = ">=0.6.2, <0.7"
 sphinx-rtd-theme = ">=3.0.2, <4"
+
+[feature.dev.dependencies]
+ipython = "*"
+
+[environments]
+dev = ["dev"]
