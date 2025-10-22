@@ -27,7 +27,8 @@ git = ">=2.51.0,<3"
 git-lfs = ">=3.7.0,<4"
 parallelio = ">=2_6_7,<3"
 cmake = ">=4.1.2,<5"
-gfortran = ">=15.2.0,<15.3"
+gfortran = ">=9,<10"
+gcc = ">=9,<10"
 
 [pypi-dependencies]
 rst2pdf = ">=0.102, <0.103"
