@@ -52,7 +52,7 @@ case $hostname in
   ## Assumption: pnetcdf is off; therefore, pio_iotype = 2
   *)
       export MACH="$hostname"
-      pio_iotype=2
+      pio_iotype=1 #2
       ;;
 esac
 
@@ -107,6 +107,9 @@ if [ ! -f "$pio_iotype_filepath" ]; then
 else
    echo "Use existing $pio_iotype_filepath file" 
 fi
+
+COMPILER=intel
+MPILIB=openmpi
 
 #
 # If NOT an existing build, run the configure
