@@ -5,6 +5,7 @@ The following are notes and instructions for how to produce a high-resolution
 NorSink, and input data for CLM/CTSM and accompanying models used in the
 project.
 
+
 ## Definition of the grid
 
 The grid is defined to be a 0.125x0.125 degree grid that is quadratic in
@@ -44,3 +45,30 @@ These limits are taken to be constraints on the *centers* of the grid cells.
 I.e., the grid cells at the edges have center latitudes and/or longitudes equal
 to those listed above, while the grid corners on the edges have latitudes and/or
 longitudes 0.0625 degrees beyond those values.
+
+
+## Steps before creating the surface data set
+
+### 1. Create the SCRIP grid file
+
+This step requires installing and activating the Python environment specified in
+`pixi.toml` and `pixi.lock` with the following commands:
+
+1. `pixi install`
+2. `pixi shell`
+
+Creating the SCRIP grid file only requires the `ncl` package in the Python
+environment and its dependencies. But if you also want to use the packages in
+the dev environment, then replace the last command with `pixi shell -e dev`.
+
+Then go to the directory `/tools/mkmapgrids/` and call the following command:
+
+`PRINT=TRUE PTNAME="NorwayRect_0.125x0.125" W_LON=4.3125 E_LON=31.3125 S_LAT=57.4375 N_LAT=71.3125 NX=216 NY=111 ncl ./mkscripgrid.ncl`
+
+See `/tools/mkmapgrids/README` for an explanation of the environment variables
+that are set prior the `ncl` command.
+
+These commands will produce an output file named
+SCRIPgrid_NorwayRect_0.125x0.125_nomask_cYYMMDD.nc (with YYMMDD replaced by the
+current date) in the folder /tools/mkmapgrids/. On betzy, this file was then
+moved to /cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/.
