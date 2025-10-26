@@ -25,6 +25,7 @@ pytest = ">=8.4.2,<9"
 coverage = ">=7.10.7,<8"
 git = ">=2.51.0,<3"
 git-lfs = ">=3.7.0,<4"
+ncl = ">=6.6.2,<7"
 
 [pypi-dependencies]
 rst2pdf = ">=0.102, <0.103"
