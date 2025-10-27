@@ -5,7 +5,6 @@ The following are notes and instructions for how to produce a high-resolution
 NorSink, and input data for CLM/CTSM and accompanying models used in the
 project.
 
-
 ## Definition of the grid
 
 The grid is defined to be a 0.125x0.125 degree grid that is quadratic in
@@ -48,6 +47,34 @@ longitudes 0.0625 degrees beyond those values.
 
 
 ## Steps before creating the surface data set
+
+**NB!** The sections of the CTSM User Guide that deal with creating new grid
+resolutions and input data sets, and various README files in the CTSM tools
+directories, are not up to date at the time of writing. Many mention
+requirements to create mapping files and domain files, which do not appear to be
+required anymore with CTSM 5.3 [*This still needs to be confirmed by completing
+the workflow without those files*]. Several outdated scripts such ad
+mknoocnmap.pl and mkmapdata.sh.
+
+The current workflow appears to be:
+
+1. Generate a SCRIP grid file for the new resolution.
+2. Enter the new resolution and SCRIP grid file into XML config files. May
+   require also creating a mesh file with
+   `/tools/site_and_regional/mesh_maker`, and possibly adding a land mask
+   and land fractions. Or the mesh file can be passed directly to `mksurfdat_esmf`
+   below without adding the resolution to the config files.
+3. Run scripts to prepare for running `mksurfdata_esmf` (in
+   `/tools/mksurfdata_esmf`):
+     a. `gen_mksurfdata_build`, to compile the mksurfdata executable.
+     b. `gen_mksurfdata_namelist`, to create namelist for mksurfdata\_esmf
+     c. `gen_mksurfdata_jobscript_multi` or `gen_mksurfdata_jobscript_single`,
+        to create job script to run mksurfdata\_esmf.
+4. Run mksurfdata using the job scripts. Download missing input data as needed.
+5. Move the generated data files to appropriate input data folders, and add them
+   to the XML databases.
+6. [Add summary of how to add the atmospheric forcing, and any custom bullets on
+   the river transport model].
 
 ### 1. Create the SCRIP grid file
 
