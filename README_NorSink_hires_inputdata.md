@@ -96,6 +96,19 @@ See `/tools/mkmapgrids/README` for an explanation of the environment variables
 that are set prior the `ncl` command.
 
 These commands will produce an output file named
-SCRIPgrid_NorwayRect_0.125x0.125_nomask_cYYMMDD.nc (with YYMMDD replaced by the
-current date) in the folder /tools/mkmapgrids/. On betzy, this file was then
-moved to /cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/.
+`SCRIPgrid_NorwayRect_0.125x0.125_nomask_cYYMMDD.nc` (with YYMMDD replaced by
+the current date) in the folder /tools/mkmapgrids/.
+
+**NB!** The commands above produce a SCRIP file without a land mask (or, more
+precisely, a land mask that is 1 for every grid cell) and no land fraction data.
+At the time of writing this (2025-10-27) it is not yet clear whether we need to
+add a land mask and/or land fraction, or whether this can be taken from the raw
+data files when generating the surface data set.
+
+### 2. Add new resolution and grid to config files
+
+On betzy, the SCRIP file produced in the previous step was moved from
+`${CTSMROOT}/tools/mkmapgrids/` to
+`/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/`.
+
+
