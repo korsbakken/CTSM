@@ -111,4 +111,16 @@ On betzy, the SCRIP file produced in the previous step was moved from
 `${CTSMROOT}/tools/mkmapgrids/` to
 `/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/`.
 
+The new resolution was then added to XML configuration/database files in the
+following way:
+
+#### Add resolution name to CTSM namelist definition file
+
+In `/bld/namelist_files/namelist_definition_ctsm.xml`, the new resolution name
+must be added to the entry `res`. Find the the XML `<entry>` tag that has the
+attribute `id="res"`, and add the new resolution name to the comma-separated
+list (without any added spaces) in the `valid_values=` attribute.
+
+On Betzy, the name `NorwayRect_0.125x0.125` was added. This will be used in the
+remainder of this guide.
 
