@@ -1,14 +1,12 @@
 #!/bin/bash
-# Edit the batch directives for your batch system
-# Below are default batch directives for derecho
-#PBS -N mksurfdata
-#PBS -j oe
-#PBS -k eod
-#PBS -S /bin/bash
-#PBS -l walltime=24:00:00
-#PBS -A nn9188k
-#PBS -q main
-#PBS -l select=2:ncpus=128:mpiprocs=128:mem=218GB
+#SBATCH --job-name=mksurfdata_esmf
+#SBATCH --acount=nn9188k
+#SBATCH --qos=preproc
+#SBATCH --time=0:30:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=128
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=218G
 
 # This is a batch script to run a set of resolutions for mksurfdata_esmf input namelist
 # NOTE: THIS SCRIPT IS AUTOMATICALLY GENERATED SO IN GENERAL YOU SHOULD NOT EDIT it!!
