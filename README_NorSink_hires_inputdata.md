@@ -187,3 +187,43 @@ The following was added on betzy:
   </model_grid>
 ```
 
+### 4. Run scripts to prepare for running `mksurfdata_esmf`
+
+The following steps need to be taken to build and configure mksurfdata_esmf
+before running it to produce the input surface data:
+
+#### a. Compile the `mksurfdata` executable
+
+This works more or less out of the box as described in
+`/tools/mksurfdata_esmf/README.md` provided the machine you are running on is
+configured correctly in `/ccs_config/machines`. Just cd to
+`/tools/mksurfdata_esmf` and run `./gen_mksurfdata_build`, but note below for
+betzy.
+
+**NB!** On betzy, there is some issue with the files included in the PIO module.
+The build process that is run by `gen_mksurfdata_build` expects to find dymamic
+library files `libpioc.so` and `libpiof.so`. These don't appear to exist in the
+configured modules for betzy, and not in any other available modules either.
+Instead, only the files `libpioc.a` and `libpiof.a`, which presumably are the
+corresponding statically linked libraries. This issue appears to be resolvable
+by simply changing `libpioc.so` to `libpioc.a` and `libpiof.so` to `libpiof.a`
+on lines 53 and 54 of `/tools/mksurfdata_esmf/src/CMakeLists.txt`. The
+executable compiles successfully after doing so (already done in the commit
+where this text was composed).
+
+#### b. Create the namelist for `mksurfdata`
+
+Assuming the new grid resolution and mesh file have been added to the XML files
+as described previously, the namelist used by `mksurfdata` can be generated with
+the following command (while in the directory `/tools/mksurfdata_esmf/`):
+
+```
+./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.125x0.125 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
+```
+
+Replace `NorwayRect_0.125x0.125` with the desired resolution name if using a
+different resolution or name, and the path after `--rawdata-dir` with the path
+to the root of the input data directory (`$DIN_LOC_ROOT`) if running on a
+different machine than betzy with a different input data path.
+
+The command will output a file called `surfdata_namelist` in current directory.
