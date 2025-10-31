@@ -1,7 +1,7 @@
 &mksurfdata_input 
   mksrf_fgrid_mesh = '/cluster/shared/noresm/inputdata/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc' 
-  mksrf_fgrid_mesh_nx = 217 
-  mksrf_fgrid_mesh_ny = 112 
+  mksrf_fgrid_mesh_nx = 216 
+  mksrf_fgrid_mesh_ny = 111 
   mksrf_flai = '/cluster/shared/noresm/inputdata/lnd/clm2/rawdata/CTSM53RawData/globalctsm53histMKSRFDeg025_240709/mksrf_landuse_ctsm53_pftlai_CLIM.c240709.nc' 
   mksrf_flai_mesh = '/cluster/shared/noresm/inputdata/lnd/clm2/mappingdata/grids/UNSTRUCTgrid_0.25x0.25_nomask_cdf5_c200129.nc' 
   mksrf_fsoicol = '/cluster/shared/noresm/inputdata/lnd/clm2/rawdata/CTSM53RawData/globalctsm53histMKSRFDeg025_240709/mksrf_landuse_ctsm53_soilcolor_CLIM.c240709.nc' 
