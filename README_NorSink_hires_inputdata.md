@@ -59,21 +59,22 @@ mknoocnmap.pl and mkmapdata.sh.
 The current workflow appears to be:
 
 1. Generate a SCRIP grid file for the new resolution.
-2. Enter the new resolution and SCRIP grid file into XML config files. May
+2. Create a mesh file for the resolution.
+3. Enter the new resolution and SCRIP grid file into XML config files. May
    require also creating a mesh file with
    `/tools/site_and_regional/mesh_maker`, and possibly adding a land mask
    and land fractions. Or the mesh file can be passed directly to `mksurfdat_esmf`
    below without adding the resolution to the config files.
-3. Run scripts to prepare for running `mksurfdata_esmf` (in
+4. Run scripts to prepare for running `mksurfdata_esmf` (in
    `/tools/mksurfdata_esmf`):
      a. `gen_mksurfdata_build`, to compile the mksurfdata executable.
      b. `gen_mksurfdata_namelist`, to create namelist for mksurfdata\_esmf
      c. `gen_mksurfdata_jobscript_multi` or `gen_mksurfdata_jobscript_single`,
         to create job script to run mksurfdata\_esmf.
-4. Run mksurfdata using the job scripts. Download missing input data as needed.
-5. Move the generated data files to appropriate input data folders, and add them
+5. Run mksurfdata using the job scripts. Download missing input data as needed.
+6. Move the generated data files to appropriate input data folders, and add them
    to the XML databases.
-6. [Add summary of how to add the atmospheric forcing, and any custom bullets on
+7. [Add summary of how to add the atmospheric forcing, and any custom bullets on
    the river transport model].
 
 ### 1. Create the SCRIP grid file
@@ -105,11 +106,47 @@ At the time of writing this (2025-10-27) it is not yet clear whether we need to
 add a land mask and/or land fraction, or whether this can be taken from the raw
 data files when generating the surface data set.
 
-### 2. Add new resolution and grid to config files
-
-On betzy, the SCRIP file produced in the previous step was moved from
-`${CTSMROOT}/tools/mkmapgrids/` to
+On betzy, the SCRIP file was moved from `${CTSMROOT}/tools/mkmapgrids/` to
 `/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/`.
+
+### 2. Create the mesh file
+
+The SCRIP grid file from the previous file is used to produce a mesh file with
+the following commands, where `[ESMF_module]` is replaced with a suitable module
+that enables the `ESMF_Scrip2Unstruct` command, `[scrip_file]` is replaced by
+the full path to the SCRIP file from the previous section, and
+`[output_esmf_file]` is replaced with the desired path and name of the output
+ESMF mesh file):
+
+```
+module load [ESMF_module]
+ESMF_Scrip2Unstruct [scrip_file] [output_esmf_file] 0
+```
+
+The `0` at the end of the `ESMF_Scrip2Unstrcut` command tells the converter that
+we want a straight grid conversion where grid cell center coordinates remain
+element centers, and grid cell corners are mapped to corners/nodes. The opposite
+would be `1` for a dual grid, where the corners are used as element centers and
+the grid cell centers of the SCRIP grid as nodes.
+
+On betzy, the following commands were used after changing to the directory
+`/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/`
+
+```
+module load ESMF/8.8.0-iomkl-2022a-ParallelIO-2.6.5
+ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.125x0.125_nomask_c251026.nc ../meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc 0
+```
+
+**NB!** This step does not add an area field (`elementArea`) to the mesh file.
+We may need to do this later. Since we use a rectangular grid with constant
+sides in lat-lon space, the formula for the areas measured in `radians^2` should
+be `0.125 * [ sin(\theta+0.0625) - sin(\theta-0.0625) ] / (4*\pi)`, where
+`\theta` is the latitude in degrees, and the `sin` function should take its
+argument in degrees (need to convert the argument if not). The added/subtracted
+number in the sine function is half the grid spacing. Scale the numbers `0.125`
+and `0.0625` accordingly if using a different grid spacing than `0.125` degrees.
+
+### 3. Add new resolution and grid to config files
 
 The new resolution was then added to XML configuration/database files in the
 following way:
