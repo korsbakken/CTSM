@@ -161,3 +161,29 @@ list (without any added spaces) in the `valid_values=` attribute.
 On Betzy, the name `NorwayRect_0.125x0.125` was added. This will be used in the
 remainder of this guide.
 
+#### Add mesh file path to the nuopc component/model grid definition files
+
+In `/ccs_config/component_grids_nuopc.xml` add a `<domain>` with the mesh file
+from point 2 in the `<domains>` section. The following tag was added on betzy
+(after `<domains>` and before `</domains>`):
+
+```
+  <domain name="NorwayRect_0.125x0.125">
+    <nx>217</nx>  <ny>112</ny>
+    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc</mesh>
+    <desc>0.125x0.125 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
+  </domain>
+```
+
+Then add aliases for the grid name in `/ccs_config/modelgrid_aliases_nuopc.xml`.
+The following was added on betzy:
+
+```
+  <model_grid alias="NorwayRect_0.125x0.125">
+    <grid name="atm">NorwayRect_0.125x0.125</grid>
+    <grid name="lnd">NorwayRect_0.125x0.125</grid>
+    <grid name="ocnice">NorwayRect_0.125x0.125</grid>
+    <mask>null</mask>
+  </model_grid>
+```
+
