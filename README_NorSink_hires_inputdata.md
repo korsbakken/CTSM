@@ -239,3 +239,10 @@ The output `surfdata.namelist` file has some issues that need to be corrected:
 2. Check the name after `hostname` and correct it if necessary. On betzy, this
    is originally set to the name of the login node, but should be replaced by
    `'betzy'`.
+
+### c. Create job script for `mksurfdata`
+
+```
+ ./gen_mksurfdata_jobscript_single --verbose --account nn9188k --number-of-nodes 2 --walltime '24:00:00' --namelist-file surfdata.namelist
+```
+
