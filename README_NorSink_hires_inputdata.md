@@ -226,4 +226,16 @@ different resolution or name, and the path after `--rawdata-dir` with the path
 to the root of the input data directory (`$DIN_LOC_ROOT`) if running on a
 different machine than betzy with a different input data path.
 
-The command will output a file called `surfdata_namelist` in current directory.
+The command will output a file called `surfdata.namelist` in current directory.
+
+The output `surfdata.namelist` file has some issues that need to be corrected:
+
+1. Find all paths that start with `/glade` (presumably a hardcoding issue in the
+   script made by NCAR?) and replace them with the corresponding correct input
+   data path for your machine (starting with
+   `/cluster/shared/noresm/inputdata/` on betzy). There were 4 such occurrences
+   at the time of writing, though this may change if it is caused by a bug that
+   gets corrected later.
+2. Check the name after `hostname` and correct it if necessary. On betzy, this
+   is originally set to the name of the login node, but should be replaced by
+   `'betzy'`.
