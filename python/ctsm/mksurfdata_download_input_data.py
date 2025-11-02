@@ -29,18 +29,22 @@ def main():
     args = _commandline_args()
     process_logging_args(args)
 
-    download_input_data(rundir=args.rundir)
+    download_input_data(rundir=args.rundir, dummycasedir=args.dummycasedir)
 
 
-def download_input_data(rundir):
+def download_input_data(
+        rundir,
+        dummycasedir,
+):
     """Implementation of the download_input_data command
 
     Args:
     rundir: str - path to directory containing .input_data_list file
+    dummycasedir: str - path to a directory with any existing valid case
     """
     _create_input_data_list(rundir)
     # TODO Remove hardwiring
-    case = Case(os.path.realpath("/home/slevis/cases_FATES/CZ2_acf_off"))
+    case = Case(os.path.realpath(dummycasedir))
     case.check_all_input_data(data_list_dir=rundir, download=True, chksum=False)
     os.remove(os.path.join(rundir, ".input_data_list"))
 
@@ -61,6 +65,19 @@ Script to download any missing input data for mksurfdata_esmf
         description=description, formatter_class=argparse.RawTextHelpFormatter
     )
 
+    parser.add_argument(
+        "--dummycasedir",
+        required=True,
+        help=(
+            "Path to the directory of any existing case created for the host "
+            "machine. This is temporarily required since this preliminary "
+            "version of `mksurfdata_download_input_data` uses functionality "
+            "from the `CIME.case.Case` class, and needs to create an instance "
+            "of that class to run. The content of the case directory does not "
+            "matter, as long as long as it is a valid case for the host "
+            "machine."
+        )
+    )
     parser.add_argument(
         "--rundir",
         default=os.getcwd(),
