@@ -228,17 +228,16 @@ different machine than betzy with a different input data path.
 
 The command will output a file called `surfdata.namelist` in current directory.
 
-The output `surfdata.namelist` file has some issues that need to be corrected:
+In the output `surfdata.namelist`, check the name after `hostname` and correct
+it if necessary. On betzy, this is originally set to the name of the login
+node, but should be replaced by `'betzy'`.
 
-1. Find all paths that start with `/glade` (presumably a hardcoding issue in the
-   script made by NCAR?) and replace them with the corresponding correct input
-   data path for your machine (starting with
-   `/cluster/shared/noresm/inputdata/` on betzy). There were 4 such occurrences
-   at the time of writing, though this may change if it is caused by a bug that
-   gets corrected later.
-2. Check the name after `hostname` and correct it if necessary. On betzy, this
-   is originally set to the name of the login node, but should be replaced by
-   `'betzy'`.
+Note that the xml file used to set the paths of the raw nput data,
+`/tools/mksurfdata_esmf/gen_mksurfdata_namelist.xml`, contained some hardcoded
+absolute paths to `/glade/campaign` (a data area at NCAR, presumably). This was
+corrected to relative paths that should give the correct paths in
+`surfdata.namelist` after running `gen_mksurfdata_namelist`, but check whether
+any absolute paths from NCAR's machines persist if you get error messages.
 
 ### c. Create job script for `mksurfdata`
 
