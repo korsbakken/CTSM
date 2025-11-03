@@ -3,11 +3,11 @@
 #SBATCH --job-name=mksurfdata_esmf
 #SBATCH --qos=preproc
 #SBATCH --partition=preproc
-#SBATCH --time=0:30:00
+#SBATCH --time=2:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=128
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=175M
+#SBATCH --mem=218G
 
 # This is a batch script to run a set of resolutions for mksurfdata_esmf input namelist
 # NOTE: THIS SCRIPT IS AUTOMATICALLY GENERATED SO IN GENERAL YOU SHOULD NOT EDIT it!!
