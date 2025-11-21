@@ -3,14 +3,13 @@
 #SBATCH --job-name=mksurfdata_esmf
 #SBATCH --qos=preproc
 #SBATCH --partition=preproc
-#SBATCH --time=2:00:00
+#SBATCH --time=1:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=128
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=218G
+#SBATCH --mem=175G
 
 # This is a batch script to run a set of resolutions for mksurfdata_esmf input namelist
-# NOTE: THIS SCRIPT IS AUTOMATICALLY GENERATED SO IN GENERAL YOU SHOULD NOT EDIT it!!
 
 # Run env_mach_specific.sh to control the machine dependent environment including the paths to compilers and libraries external to cime such as netcdf
 . /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/.env_mach_specific.sh

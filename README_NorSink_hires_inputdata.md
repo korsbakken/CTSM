@@ -241,7 +241,33 @@ any absolute paths from NCAR's machines persist if you get error messages.
 
 ### c. Create job script for `mksurfdata`
 
-```
- ./gen_mksurfdata_jobscript_single --verbose --account nn9188k --number-of-nodes 2 --walltime '24:00:00' --namelist-file surfdata.namelist
-```
+A job script is required to run `mksurfdata` on a compute node. A starting
+point can be generated with the script `gen_mksurfdata_jobscript_single` (in
+the `/tools/mksurfdata_esmf` folder), but this generates a job script for
+NCAR machines and the scheduling system that the use, not for betzy and not for
+SLURM.
 
+A job script adapted for betzy and SLURM can be found at
+`/tools/mksurfdata_esmf/mksurfdata_jobscript_single_betzy_janko.sh`. You may
+need to adjust the time allocation depending on what you want to generate
+(or if the time expires before the job finishes, or next time if you finish
+with a lot of time left over). This in particular depends on whether you
+generate input files for transient land use, or just the surface data input
+file, since the land use files require separate files for each model year
+and can take a long time to generate.
+
+The time is adjusted by changing the line that starts with `#SBATCH --time=`,
+and setting the requested wall time in format `h:mm:ss`.
+
+In the run made by `korsbakken` on betzy, the surface data file itself was
+generated after less than 20 minutes, while processing data for the land use
+file took more than 4 minutes per year. Generating the land use data set for
+1850--2023 was aborted during generation of the 1860 data, in a job with a
+total allocation of 1 hour (we did not make another attempt through this
+procedure, since we in any case want to use a different land use dataset
+than the standard CTSM input).
+
+The job script included in the commit at the time of writing has the time
+allocation set to 1&nbsp;hour. If you only want to generate a surface data file
+and no land use files, 30&nbsp;minutes (`0:30:00`) will probably be more than
+enough.
