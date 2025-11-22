@@ -328,7 +328,7 @@ If you haven't created a case for CTSM 5.3 before, you need to do so.
 Preferrably using `create_newcase` from this repository to ensure that the
 versions used are consistent.
 
-### b. Modify download and input file paths to get around missing write permissions
+#### b. Modify download and input file paths to get around missing write permissions
 
 If the log or error messages says that some files could not be downloaded or
 could not be written when running `download_input_data`, check whether you have
@@ -369,6 +369,66 @@ by creating a separate directory called `rawdata_norsink_tmp` under
 should have the correct group and permissions set, and persumably have a lot of
 the files that are needed already. It can be reused to avoid redownloading and
 duplicating files unnecessarily.
+
+
+### 6. Run `mksurfdata` to generate surface data and land use files
+
+If all downloads completed successfully, everything should be ready to run
+`mksurfdata` and generate the surface data and land use input files.
+
+Before running, check that the settings in the job script file (e.g., modelled
+after `mksurfdata_jobscript_single_betzy_janko.sh`) are appropriate. In
+particular, check the following:
+
+1. **That the paths to `.env_mach_specific.sh` and the `mksurfdata` executable are set correctly.**
+   There is one line that sources the script `.env_mach_specific.sh` to set the
+   correct environment, and one that runs `mksurfdata` itself (starting with
+   `time srun ...` and containing a path to `mksurfdata`). In the example job
+   script used by `janko` in this branch, there are absolute paths to the
+   location of the repo in the home folder of the user `janko` on these lines,
+   and they must be chaned to the absolute paths of `.env_mach_specific.sh`` and
+   `mksurfdata` under the `mksurfdata_esmf` folder where you have your clone of
+   the repo.
+2. **That the `SBATCH` parameters at the top of the job script are appropriate.**
+
+   The following parameters were used for the run on betzy in November 2025, for
+   generating both a surface data and land use file:
+   ```
+   #!/bin/bash
+   #SBATCH --account=nn9188k
+   #SBATCH --job-name=mksurfdata_esmf
+   #SBATCH --qos=preproc
+   #SBATCH --partition=preproc
+   #SBATCH --time=17:00:00
+   #SBATCH --nodes=1
+   #SBATCH --ntasks-per-node=128
+   #SBATCH --cpus-per-task=1
+   #SBATCH --mem=175G
+   ```
+   The actual run took 12.6 hours of wall time in total. The surface data file
+   was generated after about 15 minutes of runtime, the remaining time was spent
+   generating the land use file.
+
+Then submit the job with the command `sbatch ./jobscriptname.sh` (replace
+`./jobscriptname.sh` with the actual path to your jobscript file) and wait for
+the job to start and finish. Once it starts, the job will create a log file in
+your current directory with the form `surfdata_*cYYMMDD.log` which will be added
+to as the job runs. You can tail this file to monitor the progress.
+
+
+### 7. Move the generated files to the appropriate inputdata folders
+
+If the `mksurfdata` job finishes successfully, it will put a surface data file
+and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
+`surfdata_*_cYYMMDD.nc` and `landuse.timeseries_*_cYYMMDD.nc`, respectively. For
+the grid used in the November 2025 run, these should be roughly 800 MB and 7.3
+GB, respectively.
+
+Move these two files (and optionally also the log file) to the inputdata folder
+where you want to use them, and which you must add to the XML databases in the
+next steps. For the data generated in November 2025 in NorSink on betzy, the
+files were moved to
+`/cluster/shared/noresm/inputdata/cicero_mods/surfdata_esmf/ctsm5.3.0/`.
 
 
 # TO BE ADDED/MOVED AND REMOVED FROM HERE
