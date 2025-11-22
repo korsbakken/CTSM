@@ -3,7 +3,7 @@
 #SBATCH --job-name=mksurfdata_esmf
 #SBATCH --qos=preproc
 #SBATCH --partition=preproc
-#SBATCH --time=1:00:00
+#SBATCH --time=17:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=128
 #SBATCH --cpus-per-task=1

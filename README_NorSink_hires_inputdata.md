@@ -71,10 +71,11 @@ The current workflow appears to be:
      b. `gen_mksurfdata_namelist`, to create namelist for mksurfdata\_esmf
      c. `gen_mksurfdata_jobscript_multi` or `gen_mksurfdata_jobscript_single`,
         to create job script to run mksurfdata\_esmf.
-5. Run mksurfdata using the job scripts. Download missing input data as needed.
-6. Move the generated data files to appropriate input data folders, and add them
+5. Download missing raw input data, using the generated scripts and namelists.
+6. Run mksurfdata using the job scripts. Download missing input data as needed.
+7. Move the generated data files to appropriate input data folders, and add them
    to the XML databases.
-7. [Add summary of how to add the atmospheric forcing, and any custom bullets on
+8. [Add summary of how to add the atmospheric forcing, and any custom bullets on
    the river transport model].
 
 ### 1. Create the SCRIP grid file
@@ -189,7 +190,7 @@ The following was added on betzy:
 
 ### 4. Run scripts to prepare for running `mksurfdata_esmf`
 
-The following steps need to be taken to build and configure mksurfdata_esmf
+The following steps need to be taken to build and configure mksurfdata\_esmf
 before running it to produce the input surface data:
 
 #### a. Compile the `mksurfdata` executable
@@ -239,7 +240,7 @@ corrected to relative paths that should give the correct paths in
 `surfdata.namelist` after running `gen_mksurfdata_namelist`, but check whether
 any absolute paths from NCAR's machines persist if you get error messages.
 
-### c. Create job script for `mksurfdata`
+#### c. Create job script for `mksurfdata`
 
 A job script is required to run `mksurfdata` on a compute node. A starting
 point can be generated with the script `gen_mksurfdata_jobscript_single` (in
@@ -261,13 +262,127 @@ and setting the requested wall time in format `h:mm:ss`.
 
 In the run made by `korsbakken` on betzy, the surface data file itself was
 generated after less than 20 minutes, while processing data for the land use
-file took more than 4 minutes per year. Generating the land use data set for
-1850--2023 was aborted during generation of the 1860 data, in a job with a
-total allocation of 1 hour (we did not make another attempt through this
-procedure, since we in any case want to use a different land use dataset
-than the standard CTSM input).
+file took more than 4 minutes per year, and a total of 12.6 hours for the period
+1850--2023.
 
 The job script included in the commit at the time of writing has the time
 allocation set to 1&nbsp;hour. If you only want to generate a surface data file
 and no land use files, 30&nbsp;minutes (`0:30:00`) will probably be more than
 enough.
+
+
+### 5. Download missing raw input data
+
+The previous steps generates a file called `.input_data_list` in
+`/tools/mksurfdata_esmf` with a list of required input data files. Check that
+there are no error messages or anything funny-looking in this file.
+
+Assuming `.input_data_list` looks reasonable, you would normally check for the
+required input files and download missing ones by running the script
+`download_input_data` in `/tools/mksurfdata_esmf`. **However**, the Python code
+called by this script contains what looks like some temporary hacks that require
+yo to have a dummy case directory that the script can plug into to use the same
+download code that is used when submitting cases to be run. **Furthermore**, the
+module `mksurfdata_download_input_data.py` (in `/python/ctsm/`) hardcodes the
+path to this dummy directory to be a subdirectory of the home directory of
+Samuel Levis (`slevis`) at UCAR. Which presumably works on NCAR machines, but
+obviously not on betzy or any sigma2 machine. This hack was still present in the
+master branch of CTSM in November 2025, and had been there for at least three
+years at that point.
+
+We have not yet patched the code to remove the need for a dummy case directory,
+but `mksurfdata_download_input_data.py` in the current branch (where this README
+is found) has been modified to allow using a different dummy case directory,
+which must be created in advance and passed to `download_input_data` through a
+new and required `--dummycasedir` argument.
+
+On betzy, there may also be issues with write permissions on individual
+subdirectories of the shared NorESM inputdata directory
+(`/cluster/shared/noresm/inputdata`) that will block `download_input_data` from
+writing downloaded data to the required locations. Basically, some
+subdirectories end up belonging to the personal file group of the user who first
+created them and/or having write permissions only for that user. This will
+prevent you from downloading new input data files if the generated input data
+list requires them to be written into the affected subdirectories.
+
+Until these problems are fixed, the following two sets of extra steps are
+therefore necessary for `download_input_data` to succeed, and for `mksurfdata`
+to be able to use the downloaded data:
+
+#### a. Use (and optionally create) a dummy case directory
+
+If you already have run a case with CTSM 5.3 on betzy and have a case directory
+that is compatible with that CTSM version, you can use this to run
+`download_input_data` as follows (while in `/tools/mksurfdata_esmf`):
+
+```
+./download_input_data --dummycasedir CASEDIR
+```
+where you replace `CASEDIR` with the absolute path to your case directory.
+Probably, any case directory that is compatible with CTSM 5.3 should work, but
+if you run in to problems, try creating a new case directory from scratch to see
+if that helps. It does not matter what compset or resolution you use, the
+directory just has to be any valid case directory.
+
+If you haven't created a case for CTSM 5.3 before, you need to do so.
+Preferrably using `create_newcase` from this repository to ensure that the
+versions used are consistent.
+
+### b. Modify download and input file paths to get around missing write permissions
+
+If the log or error messages says that some files could not be downloaded or
+could not be written when running `download_input_data`, check whether you have
+write permissions to the directory that is being downloaded to. If not, the most
+sustainable option is to get in touch with the user or users who own each
+affected directory, and ask them to
+
+1. Change the group of the directory and everything in it to `noresm` if it does
+   not already belong to it:
+   ```
+   chgrp -R noresm dirname
+   ```
+   where `dirname` is the name of the outermost directory that does not have the
+   right group or permissions.
+
+2. Give write permissions to the group to everything, and `s` and `x` permission
+   for all directories:
+   ```
+   chmod -R g+w dirname
+   find dirname -type d -exec chmod g+sx {} \;
+   ```
+   where again `dirname` is replaced with the path of the outermost directory
+   that does not have the right permissions.
+
+If this is not feasible in a reasonable amount of time (which it may not be,
+since there may be many different users involved), you can create an alternate
+directory with the right group and permissions (if it does not already exist,
+see below), and then manually change the affected paths in the following files:
+* `.input_data_list`
+* `surfdata.namelist`
+* The list of land use files (`landuse_timeseries_hist_*.txt`, where the `*`
+  depends on the years and number of pfts).
+
+This problem did arise in the run on betzy in November 2025. This was "solved"
+by creating a separate directory called `rawdata_norsink_tmp` under
+`/cluster/shared/noresm/inputdata/`, parallel to the main rawdata folder
+`/cluster/shared/noresm/inputdata/rawdata/`. If this folder is still there, it
+should have the correct group and permissions set, and persumably have a lot of
+the files that are needed already. It can be reused to avoid redownloading and
+duplicating files unnecessarily.
+
+
+# TO BE ADDED/MOVED AND REMOVED FROM HERE
+
+Text here is text that needs to be added somewhere before finalizing this
+documnent:
+
+## Missing year numbers in land use file
+
+The land use file (`landuse.timeseries_*.nc`) generated by `mksurfdat` contains
+a `time` dimension with one point per year, as well as a 1-d variable named `YEAR` that
+presumably should contain year numbers. The dimension contains the expected
+number of points (one per year), but the values of both `YEAR` and the `time`
+coordinate variable itself are for some reason all 0. This can presumably be
+rectified by manually changing the `YEAR` and/or `time` variable to have the
+correct values.
+
