@@ -416,7 +416,7 @@ your current directory with the form `surfdata_*cYYMMDD.log` which will be added
 to as the job runs. You can tail this file to monitor the progress.
 
 
-### 7. Move the generated files to the appropriate inputdata folders
+### 7. Move the generated files to inputdata folders and add to XML databases
 
 If the `mksurfdata` job finishes successfully, it will put a surface data file
 and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
@@ -424,11 +424,41 @@ and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
 the grid used in the November 2025 run, these should be roughly 800 MB and 7.3
 GB, respectively.
 
+Do the two following steps (the last one is required only for later convenience):
+
+#### 1. Move the fles to an appropriate input data folder
+
 Move these two files (and optionally also the log file) to the inputdata folder
-where you want to use them, and which you must add to the XML databases in the
-next steps. For the data generated in November 2025 in NorSink on betzy, the
-files were moved to
+where you want to use them. There is no absolute requirement for where to place
+them, butthe data generated in November 2025 in NorSink on betzy were moved to
 `/cluster/shared/noresm/inputdata/cicero_mods/surfdata_esmf/ctsm5.3.0/`.
+
+In general on betzy, we use folders under `/cluster/shared/noresm/inputdata/`
+for input files that all noresm users on betzy should have access to, and
+specifically the subfolder `cicero_mods` for files that have been modified or
+created by CICERO for special purposes.
+
+#### 2. Add the paths to the generated files to the XML databases
+
+In order to use the new grid and the new input data files in scripts such as
+`create_newcase`, they need to be added to
+`/bld/namelist_files/namelist_defaults_ctsm.xml` (if not, you will need to
+specify them manually when creating a case):
+
+1. Add the path to the surface data file in an `<fsurdat>` field, with appropriate options for `sim_year` and `use_crop`.
+   For the `NorwayRect_0.125x0.125` grid and files created in November 2025 on betzy, the following lines were added:
+   ```
+   <fsurdat hgrid="NorwayRect_0.125x0.125" sim_year="1850" use_crop=".true." >
+   cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.nc</fsurdat>
+   ```
+
+2. Add the path to the land use file in an `<flanduse>` field. For the
+   `NorwayRect_0.125x0.125` grid and files created in November 2025 on betzy,
+   the following lines were added:
+   ```
+   <flanduse_timeseries hgrid="NorwayRect_0.125x0.125" sim_year_range="1850-2023">
+   cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.125x0.125_hist_1850-2023_78pfts_c251102.nc</flanduse_timeseries>
+   ```
 
 
 # TO BE ADDED/MOVED AND REMOVED FROM HERE
