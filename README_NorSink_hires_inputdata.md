@@ -5,6 +5,27 @@ The following are notes and instructions for how to produce a high-resolution
 NorSink, and input data for CLM/CTSM and accompanying models used in the
 project.
 
+## Contents
+- [Definition of the grid](#definition-of-the-grid)
+- [Steps before creating the surface data set](#steps-before-creating-the-surface-data-set)
+  - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+  - [2. Create the mesh file](#2-create-the-mesh-file)
+  - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
+    - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
+    - [Add mesh file path to the nuopc component/model grid definition files](#add-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
+  - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
+    - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
+    - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
+    - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
+  - [5. Download missing raw input data](#5-download-missing-raw-input-data)
+    - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
+    - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
+  - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
+  - [7. Move the generated files to inputdata folders and add to XML databases](#7-move-the-generated-files-to-inputdata-folders-and-add-to-xml-databases)
+    - [1. Move the fles to an appropriate input data folder](#1-move-the-fles-to-an-appropriate-input-data-folder)
+    - [2. Add the paths to the generated files to the XML databases](#2-add-the-paths-to-the-generated-files-to-the-xml-databases)
+
+
 ## Definition of the grid
 
 The grid is defined to be a 0.125x0.125 degree grid that is quadratic in
