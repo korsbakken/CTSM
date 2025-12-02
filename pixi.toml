@@ -1,6 +1,6 @@
 [workspace]
 authors = ["Jan Ivar Korsbakken <janko@cicero.oslo.no>"]
-channels = ["conda-forge", "main", "r", "msys2"]
+channels = ["conda-forge"]
 name = "ctsm_pylib"
 platforms = ["linux-64"]
 version = "0.1.0"
@@ -9,30 +9,30 @@ version = "0.1.0"
 
 [dependencies]
 python = ">=3.13.7,<3.14"
-xarray = ">=2025.9.0,<2026"
-tqdm = ">=4.67.1,<5"
-scipy = ">=1.16.2,<2"
-netcdf4 = ">=1.7.2,<2"
-requests = ">=2.32.5,<3"
-xesmf = ">=0.8.10,<0.9"
-numba = ">=0.62.1,<0.63"
-pylint = ">=3.3.8,<4"
-black = ">=25.1.0,<26"
-cartopy = ">=0.25.0,<0.26"
-matplotlib = ">=3.10.6,<4"
-pip = ">=25.2,<26"
-pytest = ">=8.4.2,<9"
-coverage = ">=7.10.7,<8"
-git = ">=2.51.0,<3"
-git-lfs = ">=3.7.0,<4"
-ncl = ">=6.6.2,<7"
+xarray = ">=2025.9.0"
+tqdm = ">=4.67.1"
+scipy = ">=1.16.2"
+netcdf4 = ">=1.7.2"
+requests = ">=2.32.5"
+xesmf = ">=0.8.10"
+numba = ">=0.62.1"
+pylint = ">=3.3.8"
+black = ">=25.1.0"
+cartopy = ">=0.25.0"
+matplotlib = ">=3.10.6"
+pip = ">=25.2"
+pytest = ">=8.4.2"
+coverage = ">=7.10.7"
+git = ">=2.51.0"
+git-lfs = ">=3.7.0"
+ncl = ">=6.6.2"
 
 [pypi-dependencies]
-rst2pdf = ">=0.102, <0.103"
-sphinx = ">=8.2.3, <9"
-sphinxcontrib-programoutput = ">=0.18, <0.19"
-sphinx-mdinclude = ">=0.6.2, <0.7"
-sphinx-rtd-theme = ">=3.0.2, <4"
+rst2pdf = ">=0.102"
+sphinx = ">=8.2.3"
+sphinxcontrib-programoutput = ">=0.18"
+sphinx-mdinclude = ">=0.6.2"
+sphinx-rtd-theme = ">=3.0.2"
 ctsm = { path = "/cluster/home/janko/src/CESM_repos/CTSM/python", editable = true }
 
 [feature.dev.dependencies]
