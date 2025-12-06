@@ -7,7 +7,7 @@ project.
 
 ## Contents
 - [Definition of the grid](#definition-of-the-grid)
-- [Steps before creating the surface data set](#steps-before-creating-the-surface-data-set)
+- [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
   - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
   - [2. Create the mesh file](#2-create-the-mesh-file)
   - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
@@ -24,6 +24,8 @@ project.
   - [7. Move the generated files to inputdata folders and add to XML databases](#7-move-the-generated-files-to-inputdata-folders-and-add-to-xml-databases)
     - [1. Move the fles to an appropriate input data folder](#1-move-the-fles-to-an-appropriate-input-data-folder)
     - [2. Add the paths to the generated files to the XML databases](#2-add-the-paths-to-the-generated-files-to-the-xml-databases)
+- [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
+  - [1. Create the test case](#1-create-the-test-case)
 
 
 ## Definition of the grid
@@ -67,7 +69,7 @@ to those listed above, while the grid corners on the edges have latitudes and/or
 longitudes 0.0625 degrees beyond those values.
 
 
-## Steps before creating the surface data set
+## Create grid files and input data for CTSM
 
 **NB!** The sections of the CTSM User Guide that deal with creating new grid
 resolutions and input data sets, and various README files in the CTSM tools
@@ -492,3 +494,51 @@ specify them manually when creating a case):
    <flanduse_timeseries hgrid="NorwayRect_0.125x0.125" sim_year_range="1850-2023">
    cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.125x0.125_hist_1850-2023_78pfts_c251102.nc</flanduse_timeseries>
    ```
+
+
+## Run a test case with the new CTSM input data (only)
+
+This section describes how to set up and run a case to test the new input data
+for CTSM but with a standard meteorological forcing dataset for DATM (the
+atmosphere data model), before creating a new high-resolution forcing data set.
+In the test case, CTSM will run on the new high-resolution grid, while DATM runs
+on a standard lower-resolution grid, relying on dynamic regridding during the
+run to map the atmosphere forcing data onto the land grid.
+
+### 1. Create the test case
+
+Before continuing, ensure that you have `/cime/scripts/` under the CTSM repo
+folder added to your `PATH` environment variable, and ensure that it is earlier
+in PATH than any directories that might contain different versions of the CIME
+scripts.
+
+Also ensure that you have a shell where you have activated the pixi
+Python environment (e.g., test by typing `type python` and check that the Python
+binary path it returns is in your pixi environment folder, or check whether your
+command line prompt starts with `(ctsm_pylib)` or `(ctsm_pylib:dev)`). Activate
+it if not (`pixi shell -e dev` while in the root folder of the CTSM repo).
+
+We create a test case with using a customized compset that uses CLM5, MOSART
+(river model), DATM for forcing, and stub components for everything else, with
+1850 surface data but no initial conditions file (we will be spinning up the
+model later). We use `BGC-CROP` settings for CLM, and the historical data set
+used for spinup with DATM (`CPLHIST`). The land and atmosphere model are run on
+the new grid, the river model on the `r05` grid, and other model on a `null`
+grid (being stubs).
+
+To to the directory where you want to create the new case directory as a
+subdirectory and give the following command (replace `NorwayRect_0.125x0.125`
+with the name of your new grid if you chose a different name, and
+`test_NorwayRect_simple_case` with a different case name if desired):
+
+```
+create_newcase \
+  --case test_NorwayRect_simple_case \
+  --compset '1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV' \
+  --res 'a%NorwayRect_0.125x0.125_l%NorwayRect0.125x0.125_r%r05_g%gland4' \
+  --machine betzy \
+  --project nn9188k \
+  --run-unsupported \
+  --walltime '0:30:00'
+```
+
