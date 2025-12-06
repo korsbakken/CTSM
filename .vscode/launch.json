@@ -17,6 +17,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/cime/scripts/create_newcase",
+            "cwd": "/cluster/work/users/${env:USER}/noresm/cases",
             "console": "integratedTerminal",
             "args": [
                 "--case", "test_NorwayRect_simple_case",
