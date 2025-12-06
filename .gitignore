@@ -6,7 +6,9 @@
 # editor files
 *.swp
 *~
-.vscode/
+# Temporarily add .vscode/launch.json, to version-control debug settings.
+.vscode/**
+!.vscode/launch.json
 
 # vim files (from https://github.com/github/gitignore/blob/master/Global/Vim.gitignore)
 # Swap

@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Debug create_newcase with specific args",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cime/scripts/create_newcase",
+            "console": "integratedTerminal",
+            "args": [
+                "--case", "test_NorwayRect_simple_case",
+                "--compset", "1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV",
+                "--res", "a%NorwayRect_0.125x0.125_l%NorwayRect0.125x0.125_r%r05_g%gland4",
+                "--machine", "betzy",
+                "--project", "nn9188k",
+                "--run-unsupported",
+                "--walltime", "0:30:00"
+            ]
+        }
+    ]
+}
