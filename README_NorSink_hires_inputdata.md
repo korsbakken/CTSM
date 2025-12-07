@@ -524,7 +524,7 @@ We create a test case with using a customized compset that uses CLM5, MOSART
 model later). We use `BGC-CROP` settings for CLM, and the historical data set
 used for spinup with DATM (`CPLHIST`). The land and atmosphere model are run on
 the new grid, the river model on the `r05` grid, and other model on a `null`
-grid (being stubs).
+grid (being stubs). The overall mask is set to that of the new grid.
 
 To to the directory where you want to create the new case directory as a
 subdirectory and give the following command (replace `NorwayRect_0.125x0.125`
@@ -535,7 +535,7 @@ with the name of your new grid if you chose a different name, and
 create_newcase \
   --case test_NorwayRect_simple_case \
   --compset '1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV' \
-  --res 'a%NorwayRect_0.125x0.125_l%NorwayRect0.125x0.125_r%r05_g%gland4' \
+  --res 'a%NorwayRect_0.125x0.125_l%NorwayRect0.125x0.125_r%r05_g%gland4_oi%null_w%null_z%null_m%NorwayRect_0.125x0.125' \
   --machine betzy \
   --project nn9188k \
   --run-unsupported \
