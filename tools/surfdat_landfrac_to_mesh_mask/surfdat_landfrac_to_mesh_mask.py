@@ -71,3 +71,42 @@ MESH_ELEMENT_AREA_ATTRS: tp.Final[dict[str, str]] = {
     'long_name': 'area weights',
     'units': 'radians^2',
 }
+
+
+def create_land_mask_from_landfrac(
+    source_ds: xr.Dataset,
+    *,
+    landfrac_var_names: tp.Sequence[str] = SURFDAT_LANDFRAC_VAR_NAMES,
+    landmask_var_name: str = MESH_MASK_VAR_NAME,
+    landfrac_threshold: float = 0.0,
+) -> xr.DataArray:
+    """Create a land mask DataArray from land fraction variables in a surface
+    data Dataset. By default, points with land fraction values greater than 0.0
+    for any listed land fraction variable are considered land. The threshold
+    can be customized.
+
+    Parameters
+    ----------
+    source_ds : xarray.Dataset
+        The input surface data Dataset containing land fraction variables.
+    landfrac_var_names : Sequence[str], optional
+        The names of the land fraction variables to consider, by default
+        `SURFDAT_LANDFRAC_VAR_NAMES`.
+    landmask_var_name : str, optional
+        The name of the output land mask variable, by default
+        `MESH_MASK_VAR_NAME`.
+    landfrac_threshold : float, optional
+        The threshold above which a land fraction value is considered land,
+        by default 0.0.
+
+    Returns
+    -------
+    xarray.DataArray
+        A DataArray representing the land mask, with 1 for points containing
+        land, and 0 for ocean points.
+    """
+    STACK_DIM: str = '__STACK_DIM__'
+    stacked_landfracs: xr.DataArray = xr.concat(
+        (source_ds(_var_name) for _var_name in landfrac_var_names),
+        dim=STACK_DIM,
+    )
