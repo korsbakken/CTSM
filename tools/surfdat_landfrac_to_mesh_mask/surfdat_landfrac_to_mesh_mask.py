@@ -43,9 +43,31 @@ compute_regular_rect_element_areas(
     latitudes: xarray.DataArray,
     longitudes: xarray.DataArray,
 ) -> xarray.DataArray
+write_output_mesh_file(
+    mesh_ds: xarray.Dataset,
+    output_path: Path,
+) -> None
+    Write the modified mesh Dataset to a new netCDF file.
 
 """
 import argparse
 from pathlib import Path
+import typing as tp
 
 import xarray as xr
+
+
+
+MESH_MASK_VAR_NAME: tp.Final[str] = 'elementMask'
+
+SURFDAT_LANDFRAC_VAR_NAMES: tp.Final[tuple[str, ...]] = (
+    'LANDFRAC_PFT',
+    'LANDFRAC_MKSURFDATA',
+)
+
+MESH_ELEMENT_AREA_VAR_NAME: tp.Final[str] = 'elementArea'
+
+MESH_ELEMENT_AREA_ATTRS: tp.Final[dict[str, str]] = {
+    'long_name': 'area weights',
+    'units': 'radians^2',
+}
