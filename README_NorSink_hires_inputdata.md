@@ -147,7 +147,7 @@ module load [ESMF_module]
 ESMF_Scrip2Unstruct [scrip_file] [output_esmf_file] 0
 ```
 
-The `0` at the end of the `ESMF_Scrip2Unstrcut` command tells the converter that
+The `0` at the end of the `ESMF_Scrip2Unstruct` command tells the converter that
 we want a straight grid conversion where grid cell center coordinates remain
 element centers, and grid cell corners are mapped to corners/nodes. The opposite
 would be `1` for a dual grid, where the corners are used as element centers and
