@@ -32,6 +32,7 @@ create_land_mask_from_landfrac(
     landfrac_var_names: Sequence[str] = SURFDAT_LANDFRAC_VAR_NAMES,
     landmask_var_name: str = MESH_MASK_VAR_NAME,
     landfrac_threshold: float = 0.0,
+    land_mask_attrs: dict[str, tp.Any] | None = None,
 ) -> xarray.DataArray
     Create a land mask DataArray from land fraction variables in a surface data
     Dataset. By default, points with land fraction values greater than 0.0 for
@@ -51,6 +52,7 @@ write_output_mesh_file(
 
 """
 import argparse
+from collections.abc import Sequence
 from pathlib import Path
 import typing as tp
 
@@ -59,6 +61,8 @@ import xarray as xr
 
 
 MESH_MASK_VAR_NAME: tp.Final[str] = 'elementMask'
+
+MESH_LAND_MASK_ATTRS: tp.Final[dict[str, tp.Any]] = {}
 
 SURFDAT_LANDFRAC_VAR_NAMES: tp.Final[tuple[str, ...]] = (
     'LANDFRAC_PFT',
@@ -79,6 +83,7 @@ def create_land_mask_from_landfrac(
     landfrac_var_names: tp.Sequence[str] = SURFDAT_LANDFRAC_VAR_NAMES,
     landmask_var_name: str = MESH_MASK_VAR_NAME,
     landfrac_threshold: float = 0.0,
+    land_mask_attrs: dict[str, tp.Any] | None = None,
 ) -> xr.DataArray:
     """Create a land mask DataArray from land fraction variables in a surface
     data Dataset. By default, points with land fraction values greater than 0.0
@@ -98,6 +103,10 @@ def create_land_mask_from_landfrac(
     landfrac_threshold : float, optional
         The threshold above which a land fraction value is considered land,
         by default 0.0.
+    land_mask_attrs : dict[str, Any] | None, optional
+        Attributes to assign to the land mask DataArray. Optional. If
+        unspecified or None, the module attribute `MESH_LAND_MASK_ATTRS` is
+        used.
 
     Returns
     -------
@@ -106,7 +115,27 @@ def create_land_mask_from_landfrac(
         land, and 0 for ocean points.
     """
     STACK_DIM: str = '__STACK_DIM__'
-    stacked_landfracs: xr.DataArray = xr.concat(
-        (source_ds(_var_name) for _var_name in landfrac_var_names),
-        dim=STACK_DIM,
+    if not isinstance(landfrac_var_names, tp.Sequence):
+        raise TypeError(
+            'landfrac_var_names must be a sequence of strings, '
+            f'got {type(landfrac_var_names)}'
+        )
+    if isinstance(landfrac_var_names, str):
+        landfrac_var_names = [landfrac_var_names]
+    if not all(isinstance(name, str) for name in landfrac_var_names):
+        raise TypeError(
+            'all elements of landfrac_var_names must be strings'
+        )
+    mask_array: xr.DataArray = (
+        source_ds[landfrac_var_names[0]] > landfrac_threshold
     )
+    for var_name in landfrac_var_names[1:]:
+        mask_array |= (source_ds[var_name] > landfrac_threshold)
+    mask_array = mask_array.astype('int32')
+    mask_array.name = landmask_var_name
+    mask_array.attrs = (
+        land_mask_attrs if land_mask_attrs is not None
+        else MESH_LAND_MASK_ATTRS
+    )
+    return mask_array
+###END def create_land_mask_from_landfrac
