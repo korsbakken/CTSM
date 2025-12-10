@@ -26,6 +26,8 @@ coverage = ">=7.10.7"
 git = ">=2.51.0"
 git-lfs = ">=3.7.0"
 ncl = ">=6.6.2"
+dask = ">=2025.11.0"
+flox = ">=0.10.7"
 
 [pypi-dependencies]
 rst2pdf = ">=0.102"
