@@ -39,6 +39,7 @@ ctsm = { path = "/cluster/home/janko/src/CESM_repos/CTSM/python", editable = tru
 
 [feature.dev.dependencies]
 ipython = "*"
+ipykernel = ">=7.1.0"
 
 [environments]
 dev = ["dev"]
