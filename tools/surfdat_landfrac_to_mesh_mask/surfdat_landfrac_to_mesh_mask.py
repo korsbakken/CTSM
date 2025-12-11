@@ -49,7 +49,20 @@ write_output_mesh_file(
     output_path: Path,
 ) -> None
     Write the modified mesh Dataset to a new netCDF file.
-
+lonlat2d_to_mesh_coords(
+    lonlat_ds: xr.Dataset,
+    mesh_ds: xr.Dataset,
+    *,
+    lon_var_name: str = 'LONGXY',
+    lat_var_name: str = 'LATIXY',
+    lon_dim_name: str = 'lsmlon',
+    lat_dim_name: str = 'lsmlat',
+    mesh_center_coords_var_name: str = 'centerCoords',
+    mesh_element_dim_name: str = 'elementCount',
+    mesh_coord_dim_name: str = 'coordDim',
+) -> xr.Dataset
+    Convert an xarray Dataset with 2D longitude and latitude dimensions to the
+    1D element-based coordinate system used in a mesh Dataset.
 """
 import argparse
 from collections.abc import Sequence
@@ -139,3 +152,134 @@ def create_land_mask_from_landfrac(
     )
     return mask_array
 ###END def create_land_mask_from_landfrac
+
+
+def _get_different_name(
+    name: str,
+    existing_names: tp.Iterable[str],
+    *,
+    add_char: str = '_',
+) -> str:
+    """Helper function to get a name that is not in a collection of existing
+    names.
+
+    The function appends `add_char` to `name` until a name is found that is not
+    in `existing_names`.
+
+    Parameters
+    ----------
+    name : str
+        The base name to modify if it already exists in `existing_names`.
+    existing_names : Iterable[str]
+        An iterable of existing names to avoid.
+    add_char : str, optional
+        The character to append to `name` if it already exists in
+        `existing_names`, by default '_'
+
+    Returns
+    -------
+    str
+        A name that is not in `existing_names`, and equal to `name` if that name
+        was not in `existing_names`.
+    """
+    new_name: str = name
+    while new_name in existing_names:
+        new_name += add_char
+    return new_name
+###END def _get_different_name
+
+
+def lonlat2d_to_mesh_coords(
+    lonlat_ds: xr.Dataset,
+    mesh_ds: xr.Dataset,
+    *,
+    lon_var_name: str = 'LONGXY',
+    lat_var_name: str = 'LATIXY',
+    lon_dim_name: str = 'lsmlon',
+    lat_dim_name: str = 'lsmlat',
+    mesh_center_coords_var_name: str = 'centerCoords',
+    mesh_element_dim_name: str = 'elementCount',
+    mesh_coord_dim_name: str = 'coordDim',
+) -> xr.Dataset:
+    """Convert an xarray Dataset with 2D longitude and latitude dimensions to
+    the 1D element-based coordinate system used in a mesh Dataset.
+
+    Parameters
+    ----------
+    lonlat_ds : xarray.Dataset
+        The input Dataset containing variables that depend on the 2D longitude
+        dimensions, and variables with the longitude and latitude coordinates.
+        The longitude and latitude variabbles are not required to be registered
+        as coordinate variables, since that is not necessarily the case in
+        surface data files.
+    mesh_ds : xarray.Dataset
+        A Dataset from a mesh file, which contains the dimensions and coordinate
+        variables that `lonlat_ds` should be mapped to.
+    lon_var_name : str, optional
+        The name of the longitude variable in `lonlat_ds`, by default
+        `'LONGXY'`. In general, the variable is assumed to be 2D, with
+        dimensions equal to those given by both `lon_dim_name` and
+        `lat_dim_name`. **NB!** The variable must contain the exact same values
+        as are found in the longitude values in the mesh file variable given by
+        `mesh_center_coords_var_name`.
+    lat_var_name : str, optional
+        The name of the latitude variable in `lonlat_ds`, by default `'LATIXY'`.
+        In general, the variable is assumed to be 2D, with dimensions equal to
+        those given by both `lon_dim_name` and `lat_dim_name`. **NB!** The
+        variable must contain the exact same values as are found in the latitude
+        values in the mesh file variable given by `mesh_center_coords_var_name`.
+    lon_dim_name : str, optional
+        The name of the longitude dimension in `lonlat_ds`, by default
+        `'lsmlon'`.
+    lat_dim_name : str, optional
+        The name of the latitude dimension in `lonlat_ds`, by default
+        `'lsmlat'`.
+    mesh_center_coords_var_name : str, optional
+        The name of the center coordinates variable in `mesh_ds`, by default
+        `'centerCoords'`.
+    mesh_element_dim_name : str, optional
+        The name of the element dimension in `mesh_ds`, by default
+        `'elementCount'`.
+    mesh_coord_dim_name : str, optional
+        The name of the coordinate dimension in `mesh_ds`, by default
+        `'coordDim'`. This dimension is assumed to have size 2, with the first
+        index representing longitude and the second index representing latitude.
+
+    Returns
+    -------
+    xarray.Dataset
+        A new dataset with the same variables as `lonlat_ds`, but mapped to the
+        dimenions of `mesh_ds`, and with the coordinate variable given by
+        `mesh_center_coords_var_name` added.
+    """
+    lonlat_ds_stacked: xr.Dataset = lonlat_ds.stack(
+        dim={mesh_element_dim_name: (lon_dim_name, lat_dim_name)},
+        create_index=False,
+    )
+    avoid_var_names: tp.Final[set[str]] = {
+        mesh_center_coords_var_name,
+        mesh_element_dim_name,
+        mesh_coord_dim_name,
+    }
+    new_lon_var_name: str = _get_different_name(lon_var_name, avoid_var_names)
+    new_lat_var_name: str = _get_different_name(lat_var_name, avoid_var_names)
+    # Determine whether the lon/lat variables are already coordinates and need
+    # to be reverted to regular variables at the end of the process.
+    revert_coords: set[str] = set(
+        _new_var_name for _new_var_name, _orig_var_name in (
+            (new_lon_var_name, lon_var_name),
+            (new_lat_var_name, lat_var_name),
+        ) if _orig_var_name not in lonlat_ds.coords
+    )
+    lonlat_ds_stacked = lonlat_ds_stacked.rename_vars(
+        {
+            _orig_var_name: _new_var_name
+            for _new_var_name, _orig_var_name in (
+                (new_lon_var_name, lon_var_name),
+                (new_lat_var_name, lat_var_name),
+            ) if _orig_var_name != _new_var_name
+        }
+    )
+    lonlat_ds_stacked = lonlat_ds_stacked.set_coords(
+        (new_lon_var_name, new_lat_var_name)
+    )
