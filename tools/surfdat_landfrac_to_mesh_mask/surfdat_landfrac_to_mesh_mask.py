@@ -104,6 +104,8 @@ MESH_CENTER_COORDS_VAR_NAME: tp.Final[str] = 'centerCoords'
 
 MESH_COORD_DIM_NAME: tp.Final[str] = 'coordDim'
 
+_UNITS_ATTR_NAME: tp.Final[str] = 'units'
+
 
 def create_land_mask_from_landfrac(
     source_ds: xr.Dataset,
@@ -204,6 +206,35 @@ def _get_different_name(
 ###END def _get_different_name
 
 
+class MeshCenterCoordsVarExistsError(ValueError):
+    """Error raised when the center coordinates variable already exists in a
+    Dataset where it is to be added.
+    """
+
+    def __init__(
+            self,
+            *args,
+            var_name: str,
+    ) -> None:
+        """Initialize the error.
+
+        Parameters
+        ----------
+        var_name : str
+            The name of the center coordinates variable that already exists.
+        """
+        self.var_name: str = var_name
+        super().__init__(
+            *args if args else (
+                f'Trying to add mesh center coordinates variable "{var_name}", '
+                'but it already exists in the Dataset.'
+            )
+        )
+    ###END def MeshCenterCoordsVarExistsError.__init__
+
+###END class MeshCenterCoordsVarExistsError
+
+
 def lonlat2d_to_mesh_coords(
     lonlat_ds: xr.Dataset,
     mesh_ds: xr.Dataset | None = None,
@@ -281,12 +312,52 @@ def lonlat2d_to_mesh_coords(
         provided, the mapping will be aligned to the element ordering in
         `mesh_ds`.
     """
+    if (
+            mesh_center_coords_var_name in lonlat_ds.variables
+            or mesh_center_coords_var_name in lonlat_ds.dims
+    ):
+        raise MeshCenterCoordsVarExistsError(
+            var_name=mesh_center_coords_var_name
+        )
     lonlat_ds_stacked: xr.Dataset = lonlat_ds.stack(
         dim={mesh_element_dim_name: (lon_dim_name, lat_dim_name)},
         create_index=False,
     )
-
-
+    def _combine_attrs(
+            attrs: Sequence[dict[str, str]],
+            context: tp.Any,
+    ) -> dict[str, str]:
+        if len(attrs) != 2:
+            return dict()
+        if all(
+            _attrs.get(_UNITS_ATTR_NAME, '').lower().startswith('degrees')
+            for _attrs in attrs
+        ):
+            return {_UNITS_ATTR_NAME: 'degrees'}
+        return dict()
+    ###END def _combine_attrs
+    lonlat_ds_stacked[mesh_center_coords_var_name] = xr.concat(
+        [
+            lonlat_ds_stacked[lon_var_name],
+            lonlat_ds_stacked[lat_var_name],
+        ],
+        dim=mesh_coord_dim_name,
+        combine_attrs=_combine_attrs,
+    )
+    if mesh_ds is not None:
+        # Align to the mesh Dataset by reindexing according to the center
+        # coordinates variable in the mesh Dataset.
+        lonlat_ds_stacked = align_mesh_center_coords(
+            lonlat_ds_stacked,
+            align_to=mesh_ds,
+            center_coords_var_name=mesh_center_coords_var_name,
+        )
+    if not keep_lon_lat_vars:
+        lonlat_ds_stacked = lonlat_ds_stacked.drop_vars(
+            (lon_var_name, lat_var_name)
+        )
+    return lonlat_ds_stacked
+###END def lonlat2d_to_mesh_coords
 
     # ###
     # Code to move to new function to align mesh datasets, or to create lon/lat
