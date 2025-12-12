@@ -23,6 +23,15 @@ MESH_ELEMENT_AREA_ATTRS : dict[str, str]
     The attributes to add to the element area variable in the output mesh file.
     By default, this includes `long_name` (`"area weights"`) and `units`
     (`"radians^2"`).
+MESH_ELEMENT_DIM_NAME : str
+    The name of the element count dimension in the mesh file. By default
+    `elementCount`.
+MESH_CENTER_COORDS_VAR_NAME : str
+    The mame of the variable that gives the center coordinates of each element
+    in the mesh file. By default `centerCoords`.
+MESH_COORD_DIM_NAME : str
+    The name of the dimension that separates longitude and latitude coordinates
+    in the mesh file. By default `coordDim`.
 
 Functions
 ---------
@@ -88,6 +97,12 @@ MESH_ELEMENT_AREA_ATTRS: tp.Final[dict[str, str]] = {
     'long_name': 'area weights',
     'units': 'radians^2',
 }
+
+MESH_ELEMENT_DIM_NAME: tp.Final[str] = 'elementCount'
+
+MESH_CENTER_COORDS_VAR_NAME: tp.Final[str] = 'centerCoords'
+
+MESH_COORD_DIM_NAME: tp.Final[str] = 'coordDim'
 
 
 def create_land_mask_from_landfrac(
@@ -191,15 +206,16 @@ def _get_different_name(
 
 def lonlat2d_to_mesh_coords(
     lonlat_ds: xr.Dataset,
-    mesh_ds: xr.Dataset,
+    mesh_ds: xr.Dataset | None = None,
     *,
     lon_var_name: str = 'LONGXY',
     lat_var_name: str = 'LATIXY',
     lon_dim_name: str = 'lsmlon',
     lat_dim_name: str = 'lsmlat',
-    mesh_center_coords_var_name: str = 'centerCoords',
-    mesh_element_dim_name: str = 'elementCount',
-    mesh_coord_dim_name: str = 'coordDim',
+    mesh_center_coords_var_name: str = MESH_CENTER_COORDS_VAR_NAME,
+    mesh_element_dim_name: str = MESH_ELEMENT_DIM_NAME,
+    mesh_coord_dim_name: str = MESH_COORD_DIM_NAME,
+    keep_lon_lat_vars: bool = True,
 ) -> xr.Dataset:
     """Convert an xarray Dataset with 2D longitude and latitude dimensions to
     the 1D element-based coordinate system used in a mesh Dataset.
@@ -212,9 +228,13 @@ def lonlat2d_to_mesh_coords(
         The longitude and latitude variabbles are not required to be registered
         as coordinate variables, since that is not necessarily the case in
         surface data files.
-    mesh_ds : xarray.Dataset
+    mesh_ds : xarray.Dataset, optional
         A Dataset from a mesh file, which contains the dimensions and coordinate
-        variables that `lonlat_ds` should be mapped to.
+        variables that `lonlat_ds` should be mapped to. If not provided,
+        `lonlat_ds` will be stacked to an element-based coordinate system as
+        used in mesh files, but without aligning it to a specific mesh file.
+        In order to add data from the returned Dataset to a specific mesh file,
+        it must first be aligned, since the ordering of elements may differ.
     lon_var_name : str, optional
         The name of the longitude variable in `lonlat_ds`, by default
         `'LONGXY'`. In general, the variable is assumed to be 2D, with
@@ -236,50 +256,66 @@ def lonlat2d_to_mesh_coords(
         `'lsmlat'`.
     mesh_center_coords_var_name : str, optional
         The name of the center coordinates variable in `mesh_ds`, by default
-        `'centerCoords'`.
+        given by the module attribute `MESH_CENTER_COORDS_VAR_NAME`.
     mesh_element_dim_name : str, optional
-        The name of the element dimension in `mesh_ds`, by default
-        `'elementCount'`.
+        The name of the element dimension in `mesh_ds`, by default given by the
+        module attribute `MESH_ELEMENT_DIM_NAME`.
     mesh_coord_dim_name : str, optional
-        The name of the coordinate dimension in `mesh_ds`, by default
-        `'coordDim'`. This dimension is assumed to have size 2, with the first
-        index representing longitude and the second index representing latitude.
+        The name of the coordinate dimension in `mesh_ds`, by default given by
+        the module attribute `MESH_COORD_DIM_NAME`. This dimension is assumed to
+        have size 2, with the first index representing longitude and the second
+        index representing latitude.
+    keep_lon_lat_vars : bool, optional
+        Whether to keep the longitude and latitude variables given by
+        `lon_var_name` and `lat_var_name` in the returned Dataset. By default
+        `True`. If `False`, the variables will be removed from the returned
+        Dataset (but the values are retained in the variable given by
+        `mesh_center_coords_var_name`).
 
     Returns
     -------
     xarray.Dataset
         A new dataset with the same variables as `lonlat_ds`, but mapped to the
-        dimenions of `mesh_ds`, and with the coordinate variable given by
-        `mesh_center_coords_var_name` added.
+        a 1D coordinate system as used in mesh files, and with the coordinate
+        variable given by `mesh_center_coords_var_name` added. If `mesh_ds` is
+        provided, the mapping will be aligned to the element ordering in
+        `mesh_ds`.
     """
     lonlat_ds_stacked: xr.Dataset = lonlat_ds.stack(
         dim={mesh_element_dim_name: (lon_dim_name, lat_dim_name)},
         create_index=False,
     )
-    avoid_var_names: tp.Final[set[str]] = {
-        mesh_center_coords_var_name,
-        mesh_element_dim_name,
-        mesh_coord_dim_name,
-    }
-    new_lon_var_name: str = _get_different_name(lon_var_name, avoid_var_names)
-    new_lat_var_name: str = _get_different_name(lat_var_name, avoid_var_names)
-    # Determine whether the lon/lat variables are already coordinates and need
-    # to be reverted to regular variables at the end of the process.
-    revert_coords: set[str] = set(
-        _new_var_name for _new_var_name, _orig_var_name in (
-            (new_lon_var_name, lon_var_name),
-            (new_lat_var_name, lat_var_name),
-        ) if _orig_var_name not in lonlat_ds.coords
-    )
-    lonlat_ds_stacked = lonlat_ds_stacked.rename_vars(
-        {
-            _orig_var_name: _new_var_name
-            for _new_var_name, _orig_var_name in (
-                (new_lon_var_name, lon_var_name),
-                (new_lat_var_name, lat_var_name),
-            ) if _orig_var_name != _new_var_name
-        }
-    )
-    lonlat_ds_stacked = lonlat_ds_stacked.set_coords(
-        (new_lon_var_name, new_lat_var_name)
-    )
+
+
+
+    # ###
+    # Code to move to new function to align mesh datasets, or to create lon/lat
+    # coordinate variables in mesh datasets.
+    # ###
+    # avoid_var_names: tp.Final[set[str]] = {
+    #     mesh_center_coords_var_name,
+    #     mesh_element_dim_name,
+    #     mesh_coord_dim_name,
+    # }
+    # new_lon_var_name: str = _get_different_name(lon_var_name, avoid_var_names)
+    # new_lat_var_name: str = _get_different_name(lat_var_name, avoid_var_names)
+    # # Determine whether the lon/lat variables are already coordinates and need
+    # # to be reverted to regular variables at the end of the process.
+    # revert_coords: set[str] = set(
+    #     _new_var_name for _new_var_name, _orig_var_name in (
+    #         (new_lon_var_name, lon_var_name),
+    #         (new_lat_var_name, lat_var_name),
+    #     ) if _orig_var_name not in lonlat_ds.coords
+    # )
+    # lonlat_ds_stacked = lonlat_ds_stacked.rename_vars(
+    #     {
+    #         _orig_var_name: _new_var_name
+    #         for _new_var_name, _orig_var_name in (
+    #             (new_lon_var_name, lon_var_name),
+    #             (new_lat_var_name, lat_var_name),
+    #         ) if _orig_var_name != _new_var_name
+    #     }
+    # )
+    # lonlat_ds_stacked = lonlat_ds_stacked.set_coords(
+    #     (new_lon_var_name, new_lat_var_name)
+    # )
