@@ -31,12 +31,7 @@ flox = ">=0.10.7"
 cfgrib = ">=0.9.15.1"
 
 [pypi-dependencies]
-rst2pdf = ">=0.102"
-sphinx = ">=8.2.3"
-sphinxcontrib-programoutput = ">=0.18"
-sphinx-mdinclude = ">=0.6.2"
-sphinx-rtd-theme = ">=3.0.2"
-ctsm = { path = "/cluster/home/janko/src/CESM_repos/CTSM/python", editable = true }
+ctsm = { path = "./python", editable = true }
 
 [feature.dev.dependencies]
 ipython = "*"
