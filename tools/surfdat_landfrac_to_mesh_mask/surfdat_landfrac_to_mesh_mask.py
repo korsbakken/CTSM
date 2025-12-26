@@ -14,13 +14,25 @@ CoordDim : enum.StrEnum
 
 Attributes
 ----------
+COORD_DIM_NAMES : Mapping[CoordDim, str]
+    A mapping from `CoordDim` enumeration members to their string names (i.e.,
+    the `CoordDim` enum class in dictionary form).
 MESH_MASK_VAR_NAME : str
     The name of the land mask variable in the output mesh file. By default
     `elementMask`.
-SURFDAT_LANDFRAC_VAR_NAMES : tuple[str, ...]
+SURFDATA_LANDFRAC_VAR_NAMES : tuple[str, ...]
     The names of the land fraction variables in the input surface data file.
     The mesh land mask will be normally be derived from points where an of the
     land fraction variables have non-zero values.
+SURFDATA_COORDS_DIMS : Mapping[CoordDim, str]
+    A mapping from `CoordDim` enumeration members to the names of the dimensions
+    in the input surface data files.
+SURFDATA_COORDS_VAR_NAMES : Mapping[CoordDim, str]
+    A mapping from `CoordDim` enumeration members to the names of the names of
+    the corresponding coordinate variables in surface data files. Note that the
+    variables are usually two-dimensional, and therefore may not exactly
+    vary along the dimension given by the respecitive key and be constant in the
+    other dimension.
 MESH_ELEMENT_AREA_VAR_NAME : str
     The name of the element area variable in the output mesh file. `elementArea`
     by default.
@@ -40,6 +52,9 @@ MESH_COORD_DIM_NAME : str
 MESH_COORD_DIMS_INDICES : Mapping[CoordDim, int]
     A mapping that gives the index of each coordinate dimension in the mesh
     file.
+MESH_LAND_MASK_ATTRS : dict[str, Any]
+    The attributes to add to or set for the land mask variable in the output
+    mesh file.
 SURFDATA_COORD_VARS_NAMES : Mapping[CoordDim, str]
     A mapping that gives the names of the longitude and latitude coordinate
     variables in the surface data files.
@@ -117,17 +132,26 @@ class CoordDim(enum.StrEnum):
     LAT = 'lat'
 ###END class CoordDim
 
+COORD_DIM_NAMES: tp.Final[Mapping[CoordDim, str]] = {
+    _member: _member.value for _member in CoordDim
+}
+
 
 MESH_MASK_VAR_NAME: tp.Final[str] = 'elementMask'
 
 MESH_LAND_MASK_ATTRS: tp.Final[dict[str, tp.Any]] = {}
 
-SURFDAT_LANDFRAC_VAR_NAMES: tp.Final[tuple[str, ...]] = (
+SURFDATA_LANDFRAC_VAR_NAMES: tp.Final[tuple[str, ...]] = (
     'LANDFRAC_PFT',
     'LANDFRAC_MKSURFDATA',
 )
 
-SURFDATA_COORD_VAR_NAMES: tp.Final[Mapping[CoordDim, str]] = {
+SURFDATA_COORD_DIMS: tp.Final[Mapping[CoordDim, str]] = {
+    CoordDim.LON: 'lsmlon',
+    CoordDim.LAT: 'lsmlat',
+}
+
+SURFDATA_COORDS_VAR_NAMES: tp.Final[Mapping[CoordDim, str]] = {
     CoordDim.LON: 'LONGXY',
     CoordDim.LAT: 'LATIXY',
 }
@@ -157,7 +181,7 @@ _UNITS_ATTR_NAME: tp.Final[str] = 'units'
 def create_land_mask_from_landfrac(
     source_ds: xr.Dataset,
     *,
-    landfrac_var_names: tp.Sequence[str] = SURFDAT_LANDFRAC_VAR_NAMES,
+    landfrac_var_names: tp.Sequence[str] = SURFDATA_LANDFRAC_VAR_NAMES,
     landmask_var_name: str = MESH_MASK_VAR_NAME,
     landfrac_threshold: float = 0.0,
     land_mask_attrs: dict[str, tp.Any] | None = None,
@@ -432,6 +456,15 @@ def main() -> None:
         required=True,
     )
     parser.add_argument(
+        '--surfdata_landfrac_vars',
+        type=str,
+        nargs='+',
+        default=list(SURFDATA_LANDFRAC_VAR_NAMES),
+        help='List of land fraction variable names in the surface data file '
+        'to use for generating the land mask, by default '
+        f'{SURFDATA_LANDFRAC_VAR_NAMES}.',
+    )
+    parser.add_argument(
         '--add-element-areas',
         type=bool,
         default=True,
@@ -449,30 +482,60 @@ def main() -> None:
     logging.basicConfig(level=args.log_level)
     mesh_file: Path = args.mesh_file
     surfdata_file: Path = args.surfdata_file
+    surfdata_landfrac_vars: list[str] = args.surfdata_landfrac_vars
+
 
     logger.info(f'Opening mesh file: {mesh_file}...')
     mesh_ds: xr.Dataset = xr.open_dataset(
         mesh_file,
         cache=True,
     )
+
     logger.info(f'Opening and 1d-stacking surface data file: {surfdata_file}...')
     surfdata_ds: xr.Dataset = xr.open_dataset(
         surfdata_file,
         cache=True,
     )
-    surfdata_ds = surfdata_ds.drop_vars(
-        _var for _var in surfdata_ds.data_vars.keys()
-        if _var not in tuple(
-            itertools.chain(
-                SURFDAT_LANDFRAC_VAR_NAMES,
-                SURFDATA_COORD_VAR_NAMES.values()
+    surfdata_ds = make_latlon_1d_indexed(
+        surfdata_ds.drop_vars(
+            _var for _var in surfdata_ds.data_vars.keys()
+            if _var not in tuple(
+                itertools.chain(
+                    SURFDATA_LANDFRAC_VAR_NAMES,
+                    SURFDATA_COORDS_VAR_NAMES.values()
+                )
             )
-        )
+        ).stack(
+            dim={MESH_ELEMENT_DIM_NAME: tuple(SURFDATA_COORD_DIMS.values())},
+            create_index=False,
+        ),
+        input_index_var_names=SURFDATA_COORDS_VAR_NAMES,
+        input_index_dim=MESH_ELEMENT_DIM_NAME,
+        output_index_dim=MESH_ELEMENT_DIM_NAME,
+        output_index_level_names=COORD_DIM_NAMES,
     )
-        # .stack(
-        #     dim={MESH_ELEMENT_DIM_NAME: SURFDATA_COORD_DIMS.keys()},
-        #     create_index=False,
-        # )
+
+    logger.info(
+        'Creating land mask from surface data land fraction variables...'
+    )
+    mesh_arr: xr.DataArray = create_land_mask_from_landfrac(
+        surfdata_ds,
+        landfrac_var_names=surfdata_landfrac_vars,
+    )
+
+    logger.info('Indexing the mesh file dataset...')
+    mesh_ds = make_latlon_1d_indexed(
+        mesh_ds,
+        input_index_dim=MESH_ELEMENT_DIM_NAME,
+        output_index_dim=MESH_ELEMENT_DIM_NAME,
+        input_multidim_index_var_name=MESH_CENTER_COORDS_VAR_NAME,
+        input_multidim_index_coord_dim_name=MESH_COORD_DIM_NAME,
+        input_multidim_index_coord_indices=MESH_COORD_DIMS_INDICES,
+        output_index_level_names=COORD_DIM_NAMES,
+    )
+
+    logger.info('Adding land mask to mesh dataset...')
+    mesh_ds[MESH_MASK_VAR_NAME] = mesh_arr
 
 ###END def main
 
