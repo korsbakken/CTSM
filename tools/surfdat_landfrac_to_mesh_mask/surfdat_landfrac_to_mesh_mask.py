@@ -90,6 +90,8 @@ from collections.abc import (
     Sequence,
 )
 import enum
+import itertools
+import logging
 from pathlib import Path
 import sys
 import typing as tp
@@ -97,6 +99,8 @@ import typing as tp
 import xarray as xr
 
 
+
+logger: tp.Final[logging.Logger] = logging.getLogger(__name__)
 
 class CoordDim(enum.StrEnum):
     """An enumeration for the coordinate dimension in a mesh file.
@@ -123,6 +127,11 @@ SURFDAT_LANDFRAC_VAR_NAMES: tp.Final[tuple[str, ...]] = (
     'LANDFRAC_MKSURFDATA',
 )
 
+SURFDATA_COORD_VAR_NAMES: tp.Final[Mapping[CoordDim, str]] = {
+    CoordDim.LON: 'LONGXY',
+    CoordDim.LAT: 'LATIXY',
+}
+
 MESH_ELEMENT_AREA_VAR_NAME: tp.Final[str] = 'elementArea'
 
 MESH_ELEMENT_AREA_ATTRS: tp.Final[dict[str, str]] = {
@@ -139,11 +148,6 @@ MESH_COORD_DIM_NAME: tp.Final[str] = 'coordDim'
 MESH_COORD_DIMS_INDICES: tp.Final[Mapping[CoordDim, int]] = {
     CoordDim.LON: 0,
     CoordDim.LAT: 1,
-}
-
-SURFDATA_COORD_VARS_NAMES: tp.Final[Mapping[CoordDim, str]] = {
-    CoordDim.LON: 'LONGXY',
-    CoordDim.LAT: 'LATIXY',
 }
 
 
@@ -401,6 +405,76 @@ def lonlat2d_to_mesh_coords(
         )
     return lonlat_ds_stacked
 ###END def lonlat2d_to_mesh_coords
+
+
+def main() -> None:
+    """Main function for the script to generate a mesh land mask from surface
+    data.
+    """
+    parser = argparse.ArgumentParser(
+        description=(
+            'Generate a mesh land mask from land fraction variables in a '
+            'surface data file, and add it t an existing mesh file.'
+            '\n\nBy default also adds element areas to the mesh file (can be '
+            'disabled.'
+        )
+    )
+    parser.add_argument(
+        '--mesh_file',
+        type=Path,
+        help='Path to the input mesh netCDF file.',
+        required=True,
+    )
+    parser.add_argument(
+        '--surfdata_file',
+        type=Path,
+        help='Path to the input surface data netCDF file.',
+        required=True,
+    )
+    parser.add_argument(
+        '--add-element-areas',
+        type=bool,
+        default=True,
+        help='Whether to compute and add element areas to the output mesh '
+        'file, by default True.',
+    )
+    parser.add_argument(
+        '--log-level',
+        type=str,
+        default='INFO',
+        help='Logging level, by default "INFO".',
+    )
+
+    args: argparse.Namespace = parser.parse_args()
+    logging.basicConfig(level=args.log_level)
+    mesh_file: Path = args.mesh_file
+    surfdata_file: Path = args.surfdata_file
+
+    logger.info(f'Opening mesh file: {mesh_file}...')
+    mesh_ds: xr.Dataset = xr.open_dataset(
+        mesh_file,
+        cache=True,
+    )
+    logger.info(f'Opening and 1d-stacking surface data file: {surfdata_file}...')
+    surfdata_ds: xr.Dataset = xr.open_dataset(
+        surfdata_file,
+        cache=True,
+    )
+    surfdata_ds = surfdata_ds.drop_vars(
+        _var for _var in surfdata_ds.data_vars.keys()
+        if _var not in tuple(
+            itertools.chain(
+                SURFDAT_LANDFRAC_VAR_NAMES,
+                SURFDATA_COORD_VAR_NAMES.values()
+            )
+        )
+    )
+        # .stack(
+        #     dim={MESH_ELEMENT_DIM_NAME: SURFDATA_COORD_DIMS.keys()},
+        #     create_index=False,
+        # )
+
+###END def main
 
     # ###
     # Code to move to new function to align mesh datasets, or to create lon/lat
