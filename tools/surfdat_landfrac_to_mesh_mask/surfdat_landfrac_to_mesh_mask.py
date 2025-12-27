@@ -61,6 +61,22 @@ SURFDATA_COORD_VARS_NAMES : Mapping[CoordDim, str]
 
 Functions
 ---------
+make_latlon_1d_indexed(
+    ds: xarray.Dataset,
+    *,
+    input_index_var_names: Mapping[CoordDim, str] | None = None,
+    input_index_dim: str,
+    output_index_dim: str,
+    input_multidim_index_var_name: str | None = None,
+    input_multidim_index_coord_dim_name: str | None = None,
+    input_multidim_index_coord_indices: Mapping[CoordDim, int] | None = None,
+    output_index_level_names: Mapping[CoordDim, str],
+) -> xarray.Dataset
+    Add a coordinate index with longitude and latitude coordinates as levels to
+    a Dataset that has a 1D element-based dimension and longitudes/latitudes
+    either as two separate variables or as components along a coordinate
+    coordinate dimension in a single variable (e.g., like `centerCoords` in ESMF
+    mesh files).
 create_land_mask_from_landfrac(
     source_ds: xarray.Dataset,
     *,
@@ -170,6 +186,147 @@ MESH_COORD_DIMS_INDICES: tp.Final[Mapping[CoordDim, int]] = {
 
 
 _UNITS_ATTR_NAME: tp.Final[str] = 'units'
+
+
+def make_latlon_1d_indexed(
+    ds: xr.Dataset,
+    *,
+    input_index_dim: str,
+    output_index_dim: str | None = None,
+    output_index_level_names: Mapping[CoordDim, str],
+    input_index_var_names: Mapping[CoordDim, str] | None = None,
+    input_multidim_index_var_name: str | None = None,
+    input_multidim_index_coord_dim_name: str | None = None,
+    input_multidim_index_coord_indices: Mapping[CoordDim, int] | None = None,
+) -> xr.Dataset:
+    """Add a coordinate index with longitude and latitude coordinates as levels
+    to a Dataset that has a 1D element-based dimension and longitudes/latitudes
+    either as two separate variables or as components along a coordinate
+    coordinate dimension in a single variable (e.g., like `centerCoords` in ESMF
+    mesh files).
+
+    If the input Dataset has separate longitude and latitude variables, specify
+    those variables in `input_index_var_names`. If the input Dataset has a
+    single multidimensional variable with a coordinate dimension (e.g., like
+    `centerCoords` in ESMF mesh files), specify the variable name in
+    `input_multidim_index_var_name`, the name of the coordinate dimension in
+    `input_multidim_index_coord_dim_name`, and which indices along that
+    dimension correspond to longitude and latitude in
+    `input_multidim_index_coord_indices`.
+
+    Either `input_index_var_names` or `input_multidim_index_var_name`,
+    `input_multidim_index_coord_dim_name`, and
+    `input_multidim_index_coord_indices` must be specified, but only one of
+    those sets.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        The input Dataset with a 1D element-based dimension.
+    input_index_dim : str
+        The name of the 1D element-based dimension in `ds`.
+    output_index_dim : str | None, optional
+        The name of the output coordinate index dimension to add to `ds`.
+        Optional, defaults to `input_index_dim`.
+    output_index_level_names : Mapping[CoordDim, str]
+        A mapping from `CoordDim` enumeration members to the names of the levels
+        in the output coordinate index that will represent longitude and
+        latitude (which will then also act as coordinate variables for the
+        same).
+    input_index_var_names : Mapping[CoordDim, str] | None, optional
+        Specify this if `ds` has a separate variable for each longitude/latitude
+        coordinate. Must be a mapping from `CoordDim` enumeration members to the names of the
+        longitude and latitude variables in `ds`.  Mutually exclusive with
+        `input_multidim_index_var_name`. By default `None`.
+    input_multidim_index_var_name : str | None, optional
+        Specify this if `ds` has a single multidimensional variable with a
+        coordinate dimension (e.g., like `centerCoords` in ESMF mesh files).
+        The name of the variable in `ds` that contains both longitude and
+        latitude coordinates along a coordinate dimension. Mutually exclusive
+        with `input_index_var_names`. By default `None`.
+    input_multidim_index_coord_dim_name : str | None, optional
+        The name of the coordinate dimension in the variable given by
+        `input_multidim_index_var_name` that separates longitude and latitude
+        coordinates. Required if `input_multidim_index_var_name` is specified.
+        By default `None`. Mutually exclusive with `input_index_var_names`.
+    input_multidim_index_coord_indices : Mapping[CoordDim, int] | None, optional
+        A mapping from `CoordDim` enumeration members to the indices along the
+        coordinate dimension in the variable given by
+        `input_multidim_index_var_name` that correspond to longitude and
+        latitude coordinates. Required if `input_multidim_index_var_name` is
+        specified. By default `None`. Mutually exclusive with
+        `input_index_var_names`.
+
+    Returns
+    -------
+    xarray.Dataset
+        The modified Dataset with the added coordinate index.
+    """
+    if (
+            (input_index_var_names is None)
+            == (input_multidim_index_var_name is None)
+    ):
+        raise ValueError(
+            'Either input_index_var_names or input_multidim_index_var_name '
+            'must be specified, but not both.'
+        )
+    if output_index_dim is None:
+        output_index_dim = input_index_dim
+
+    coord_vars: dict[CoordDim, xr.DataArray]
+    if input_index_var_names is not None:
+        if set(input_index_var_names.keys()) != set(CoordDim):
+            raise ValueError(
+                'input_index_var_names must have exactly the following keys: '
+                f'{set(CoordDim)}'
+            )
+        index_level_coords: dict[CoordDim, xr.DataArray] = {
+            _coord_dim: ds[input_index_var_names[_coord_dim]]
+            for _coord_dim in CoordDim
+        }
+    else:
+        if (
+                input_multidim_index_coord_dim_name is None
+                or input_multidim_index_coord_indices is None
+        ):
+            raise ValueError(
+                'If input_multidim_index_var_name is specified, both '
+                'input_multidim_index_coord_dim_name and '
+                'input_multidim_index_coord_indices must also be specified.'
+            )
+        if set(input_multidim_index_coord_indices.keys()) != set(CoordDim):
+            raise ValueError(
+                'input_multidim_index_coord_indices must have exactly the '
+                f'following keys: {set(CoordDim)}'
+            )
+        index_var: xr.DataArray = ds[input_multidim_index_var_name]
+        index_level_coords: dict[CoordDim, xr.DataArray] = {
+            _coord_dim: index_var.isel(
+                {
+                    input_multidim_index_coord_dim_name:
+                        input_multidim_index_coord_indices[_coord_dim]
+                }
+            )
+            for _coord_dim in CoordDim
+        }
+        del index_var
+
+    ds = ds.assign_coords(
+        {
+            output_index_level_names[_coord_dim]: index_level_coords[_coord_dim]
+            for _coord_dim in CoordDim
+        }
+    )
+    del index_level_coords
+    ds = ds.set_index(
+        {
+            output_index_dim: list(output_index_level_names.values())
+        }
+    )
+    return ds
+###END def make_latlon_1d_indexed
+
+
 
 
 def create_land_mask_from_landfrac(
