@@ -483,7 +483,8 @@ def main() -> None:
     mesh_file: Path = args.mesh_file
     surfdata_file: Path = args.surfdata_file
     surfdata_landfrac_vars: list[str] = args.surfdata_landfrac_vars
-
+    mesh_mask_var_name: str = MESH_MASK_VAR_NAME
+    mesh_element_area_var_name: str = MESH_ELEMENT_AREA_VAR_NAME
 
     logger.info(f'Opening mesh file: {mesh_file}...')
     mesh_ds: xr.Dataset = xr.open_dataset(
@@ -518,7 +519,7 @@ def main() -> None:
     logger.info(
         'Creating land mask from surface data land fraction variables...'
     )
-    mesh_arr: xr.DataArray = create_land_mask_from_landfrac(
+    mesh_mask_arr: xr.DataArray = create_land_mask_from_landfrac(
         surfdata_ds,
         landfrac_var_names=surfdata_landfrac_vars,
     )
@@ -534,8 +535,15 @@ def main() -> None:
         output_index_level_names=COORD_DIM_NAMES,
     )
 
-    logger.info('Adding land mask to mesh dataset...')
-    mesh_ds[MESH_MASK_VAR_NAME] = mesh_arr
+    logger.info(
+        f'Adding land mask to mesh dataset as variable {mesh_mask_var_name}...'
+    )
+    if mesh_mask_var_name in mesh_ds.variables:
+        logger.warning(
+            f'Variable {mesh_mask_var_name} already exists in the mesh '
+            'dataset and will be overwritten.'
+        )
+    mesh_ds[mesh_mask_var_name] = mesh_mask_arr.reindex_like(mesh_ds)
 
 ###END def main
 
