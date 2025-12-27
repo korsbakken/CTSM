@@ -73,12 +73,6 @@ create_land_mask_from_landfrac(
     Dataset. By default, points with land fraction values greater than 0.0 for
     any listed land fraction variable are considered land. The threshold can be
     customized.
-compute_regular_rect_element_areas(
-    mesh_ds: xarray.Dataset,
-    *,
-    latitudes: xarray.DataArray,
-    longitudes: xarray.DataArray,
-) -> xarray.DataArray
 write_output_mesh_file(
     mesh_ds: xarray.Dataset,
     output_path: Path,
@@ -587,9 +581,9 @@ def main() -> None:
         del mesh_area_arr
 
     logger.info(f'Writing output mesh file: {output_mesh_file}...')
-    mesh_ds.to_netcdf(
-        path=output_mesh_file,
-        format='NETCDF4',
+    write_output_mesh_file(
+        mesh_ds,
+        output_mesh_file,
     )
     mesh_ds.close()
 
