@@ -89,6 +89,12 @@ create_land_mask_from_landfrac(
     Dataset. By default, points with land fraction values greater than 0.0 for
     any listed land fraction variable are considered land. The threshold can be
     customized.
+compute_mesh_element_areas(
+    mesh_ds: xarray.Dataset,
+) -> xarray.DataArray
+    Compute the area of each element in a mesh Dataset. Returns the areas as a
+    DataArray, in the units used by `esmpy.Field.get_area()` (usually
+    radians^2, i.e., normalized to 4*pi).
 write_output_mesh_file(
     mesh_ds: xarray.Dataset,
     output_path: Path,
@@ -119,6 +125,7 @@ import itertools
 import logging
 from pathlib import Path
 import sys
+import tempfile
 import typing as tp
 
 import xarray as xr
@@ -366,7 +373,6 @@ def create_land_mask_from_landfrac(
         A DataArray representing the land mask, with 1 for points containing
         land, and 0 for ocean points.
     """
-    STACK_DIM: str = '__STACK_DIM__'
     if not isinstance(landfrac_var_names, tp.Sequence):
         raise TypeError(
             'landfrac_var_names must be a sequence of strings, '
@@ -391,6 +397,57 @@ def create_land_mask_from_landfrac(
     )
     return mask_array
 ###END def create_land_mask_from_landfrac
+
+
+def compute_mesh_element_areas(
+    mesh: xr.Dataset | Path | str,
+) -> xr.DataArray:
+    """Compute the area of each element in a mesh Dataset.
+
+    Note that the function relies on creating an `esmpy.Mesh` object from file
+    in order to avoid manually having to create nodes and stagger locations. As
+    a result, if an `xarray.Dataset` is provided as input, it will first be
+    written to a temporary netCDF file before being read by `esmpy`. The
+    temporary file will be removed before returning.
+
+    In order to avoid unnecessary imports, the `esmpy` module is only imported
+    when this function is first called.
+
+    Parameters
+    ----------
+    mesh_ds : xarray.Dataset
+        The input mesh Dataset. Must be an ESMF mesh file.
+
+    Returns
+    -------
+    xarray.DataArray
+        A DataArray containing the area of each element in the mesh Dataset. The
+        areas are in the units used by `esmpy.Field.get_area()` (usually
+        radians^2, i.e., normalized to 4*pi).
+    """
+    import esmpy
+    if isinstance(mesh, (str, Path)):
+        mesh_obj: esmpy.Mesh = esmpy.Mesh(
+            filename=str(mesh),
+            filetype=esmpy.FileFormat.ESMFMESH,
+        )
+    else:
+        with tempfile.NamedTemporaryFile(
+            suffix='.nc',
+            prefix='temp_mesh_',
+            delete=True,
+        ) as temp_mesh_file:
+            mesh_path = Path(temp_mesh_file.name)
+            mesh.to_netcdf(mesh_path)
+            mesh_obj: esmpy.Mesh = esmpy.Mesh(
+                filename=str(mesh_path),
+                filetype=esmpy.FileFormat.ESMFMESH,
+            )
+    area_field: esmpy.Field = esmpy.Field(
+        grid=mesh_obj,
+        name='elementArea',
+        meshloc=esmpy.MeshLoc.ELEMENT,
+    )
 
 
 def _get_different_name(
