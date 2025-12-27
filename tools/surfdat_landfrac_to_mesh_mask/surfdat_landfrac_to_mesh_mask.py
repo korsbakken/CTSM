@@ -456,6 +456,12 @@ def main() -> None:
         required=True,
     )
     parser.add_argument(
+        '--output_mesh_file',
+        type=Path,
+        help='Path to the output mesh netCDF file.',
+        required=True,
+    )
+    parser.add_argument(
         '--surfdata_landfrac_vars',
         type=str,
         nargs='+',
@@ -481,6 +487,7 @@ def main() -> None:
     args: argparse.Namespace = parser.parse_args()
     logging.basicConfig(level=args.log_level)
     mesh_file: Path = args.mesh_file
+    output_mesh_file: Path = args.output_mesh_file
     surfdata_file: Path = args.surfdata_file
     surfdata_landfrac_vars: list[str] = args.surfdata_landfrac_vars
     mesh_mask_var_name: str = MESH_MASK_VAR_NAME
@@ -544,6 +551,47 @@ def main() -> None:
             'dataset and will be overwritten.'
         )
     mesh_ds[mesh_mask_var_name] = mesh_mask_arr.reindex_like(mesh_ds)
+    logger.debug(
+        'Adding attributes to the mesh land mask variable...',
+        extra={
+            'original_attrs': mesh_ds[mesh_mask_var_name].attrs,
+            'new_attrs': MESH_LAND_MASK_ATTRS,
+        },
+    )
+    mesh_ds[mesh_mask_var_name].attrs.update(MESH_LAND_MASK_ATTRS)
+    del mesh_mask_arr
+    surfdata_ds.close()
+
+    if args.add_element_areas:
+        logger.info(
+            'Computing and adding element areas to the mesh dataset as '
+            f'variable {mesh_element_area_var_name}...'
+        )
+        mesh_area_arr: xr.DataArray = compute_mesh_element_areas(mesh_ds)
+        if mesh_element_area_var_name in mesh_ds.variables:
+            logger.warning(
+                f'Variable {mesh_element_area_var_name} already exists in '
+                'the mesh dataset and will be overwritten.'
+            )
+        mesh_ds[mesh_element_area_var_name] = mesh_area_arr
+        logger.debug(
+            'Adding attributes to the mesh element area variable...',
+            extra={
+                'original_attrs': mesh_ds[mesh_element_area_var_name].attrs,
+                'new_attrs': MESH_ELEMENT_AREA_ATTRS,
+            },
+        )
+        mesh_ds[mesh_element_area_var_name].attrs.update(
+            MESH_ELEMENT_AREA_ATTRS
+        )
+        del mesh_area_arr
+
+    logger.info(f'Writing output mesh file: {output_mesh_file}...')
+    mesh_ds.to_netcdf(
+        path=output_mesh_file,
+        format='NETCDF4',
+    )
+    mesh_ds.close()
 
 ###END def main
 
