@@ -90,10 +90,10 @@ create_land_mask_from_landfrac(
     any listed land fraction variable are considered land. The threshold can be
     customized.
 compute_mesh_element_areas(
-    mesh_ds: xarray.Dataset,
-) -> xarray.DataArray
-    Compute the area of each element in a mesh Dataset. Returns the areas as a
-    DataArray, in the units used by `esmpy.Field.get_area()` (usually
+    mesh_ds: xarray.Dataset | Path | str,
+) -> esmpy.Field
+    Compute the area of each element in a mesh Dataset. Returns the areas as an
+    esmpy.Field object, in the units used by `esmpy.Field.get_area()` (usually
     radians^2, i.e., normalized to 4*pi).
 write_output_mesh_file(
     mesh_ds: xarray.Dataset,
@@ -401,6 +401,10 @@ def create_land_mask_from_landfrac(
 
 def compute_mesh_element_areas(
     mesh: xr.Dataset | Path | str,
+    *,
+    mesh_element_dim_name: str = MESH_ELEMENT_DIM_NAME,
+    mesh_area_var_name: str = MESH_ELEMENT_AREA_VAR_NAME,
+    mesh_area_attrs: dict[str, str] = MESH_ELEMENT_AREA_ATTRS,
 ) -> xr.DataArray:
     """Compute the area of each element in a mesh Dataset.
 
@@ -423,7 +427,12 @@ def compute_mesh_element_areas(
     xarray.DataArray
         A DataArray containing the area of each element in the mesh Dataset. The
         areas are in the units used by `esmpy.Field.get_area()` (usually
-        radians^2, i.e., normalized to 4*pi).
+        radians^2, i.e., normalized to 4*pi). The returned data array is 1d with
+        dimension given by `mesh_element_dim_name`. If `mesh` is an
+        `xarray.Dataset`, the ordering of elements will match it so that the
+        DataArray can be directly added to the Dataset, but note that the
+        DataArray will not have any coordinates or an index. These must be added
+        from the original mesh Dataset if needed.
     """
     import esmpy
     if isinstance(mesh, (str, Path)):
@@ -448,6 +457,17 @@ def compute_mesh_element_areas(
         name='elementArea',
         meshloc=esmpy.MeshLoc.ELEMENT,
     )
+    area_field.get_area()
+    area_arr: xr.DataArray = xr.DataArray(
+        data=area_field.data,
+        dims=(mesh_element_dim_name,),
+        attrs=mesh_area_attrs,
+    )
+    area_field.destroy()
+    mesh_obj.destroy()
+    del area_field, mesh_obj
+    return area_arr
+###END def compute_mesh_element_areas
 
 
 def _get_different_name(
