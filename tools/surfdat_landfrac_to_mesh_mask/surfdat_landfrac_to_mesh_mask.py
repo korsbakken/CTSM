@@ -98,6 +98,9 @@ compute_mesh_element_areas(
 write_output_mesh_file(
     mesh_ds: xarray.Dataset,
     output_path: Path,
+    *,
+    format: nc4.Dataset.Format|None = None,
+    clobber: bool = False,
 ) -> None
     Write the modified mesh Dataset to a new netCDF file.
 lonlat2d_to_mesh_coords(
@@ -113,7 +116,8 @@ lonlat2d_to_mesh_coords(
     mesh_coord_dim_name: str = 'coordDim',
 ) -> xr.Dataset
     Convert an xarray Dataset with 2D longitude and latitude dimensions to the
-    1D element-based coordinate system used in a mesh Dataset.
+    1D element-based coordinate system used in a mesh Dataset. NB! Not correctly
+    implemented yet.
 """
 import argparse
 from collections.abc import (
@@ -128,6 +132,7 @@ import sys
 import tempfile
 import typing as tp
 
+import netCDF4 as nc4
 import xarray as xr
 
 
@@ -468,6 +473,80 @@ def compute_mesh_element_areas(
     del area_field, mesh_obj
     return area_arr
 ###END def compute_mesh_element_areas
+
+
+def write_output_mesh_file(
+    mesh_ds: xr.Dataset,
+    output_path: Path|str,
+    *,
+    format: str | None = None,
+    clobber: bool = False,
+) -> None:
+    """Write a modified mesh Dataset to a new netCDF file.
+
+    Parameters
+    ----------
+    mesh_ds : xarray.Dataset
+        The modified mesh Dataset.
+    output_path : Path | str
+        The path to the output netCDF file.
+    format : Literal['NETCDF4', 'NETCDF4_CLASSIC', 'NETCDF3_64BIT',
+            'NETCDF3_CLASSIC'] | None, optional
+        The netCDF format to use for the output file. If `None`, the function
+        will attempt to infer and use the format of the original mesh file if
+        `mesh_ds.encoding['source']` exists. Otherwise, `NETCDF4` will be used
+        by default.
+    """
+    if format is None:
+        source_path: str | None = mesh_ds.encoding.get('source', None)
+        if source_path is not None:
+            try:
+                with nc4.Dataset(source_path, mode='r') as src_nc4:
+                    format = src_nc4.file_format
+                    logger.debug(
+                        f'Inferred NetCDF format "{format}" from source mesh '
+                        f'file "{source_path}".'
+                    )
+                    if format.startswith('NETCDF3_64BIT'):
+                        format = 'NETCDF3_64BIT'
+            except Exception as exc:
+                logger.warning(
+                    f'Error when trying to open source mesh file '
+                    f'"{source_path}" to infer NetCDF format. Please specify '
+                    f'the format explicitly through the `format` parameter to '
+                    'avoid this error, or ensure that the source file exists, '
+                    'is readable, and can be read by `netCDF4.Dataset`.'
+                )
+        else:
+            logger.warning(
+                'The mesh Dataset does not specify a source file in '
+                '`mesh_ds.encoding["source"]`. Using NETCDF4 by default. '
+                'Specify the `format` parameter explicitly to avoid this '
+                'warning.'
+            )
+            format = 'NETCDF4'
+    if Path(output_path).exists() and not clobber:
+        raise FileExistsError(
+            f'Output file "{output_path}" already exists. To overwrite, set '
+            'the `clobber` parameter to True.'
+        )
+    if format not in (
+            'NETCDF4',
+            'NETCDF4_CLASSIC',
+            'NETCDF3_64BIT',
+            'NETCDF3_CLASSIC',
+    ):
+        raise ValueError(
+            f'Invalid NetCDF format "{format}". Must be one of '
+            '"NETCDF4", "NETCDF4_CLASSIC", "NETCDF3_64BIT", or '
+            '"NETCDF3_CLASSIC"'
+        )
+    mesh_ds.to_netcdf(
+        path=output_path,
+        format=format,
+    )
+    logger.info(f'Wrote output mesh file to "{output_path}".')
+###END def write_output_mesh_file
 
 
 def _get_different_name(
