@@ -902,6 +902,10 @@ def main() -> None:
 
 ###END def main
 
+
+if __name__ == '__main__':
+    main()
+
     # ###
     # Code to move to new function to align mesh datasets, or to create lon/lat
     # coordinate variables in mesh datasets.
