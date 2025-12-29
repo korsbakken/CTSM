@@ -29,6 +29,7 @@ ncl = ">=6.6.2"
 dask = ">=2025.11.0"
 flox = ">=0.10.7"
 cfgrib = ">=0.9.15.1"
+hvplot = ">=0.12.2,<0.13"
 
 [pypi-dependencies]
 ctsm = { path = "./python", editable = true }
