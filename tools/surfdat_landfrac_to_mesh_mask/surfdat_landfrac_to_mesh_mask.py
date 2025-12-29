@@ -475,7 +475,6 @@ def compute_mesh_element_areas(
         dims=(mesh_element_dim_name,),
         attrs=mesh_area_attrs,
     )
-    area_field.destroy()
     mesh_obj.destroy()
     del area_field, mesh_obj
     return area_arr
