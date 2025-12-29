@@ -835,6 +835,7 @@ def main() -> None:
         mesh_file,
         cache=True,
     )
+    mesh_ds_original: xr.Dataset = mesh_ds.copy()
 
     logger.info(f'Opening and 1d-stacking surface data file: {surfdata_file}...')
     surfdata_ds: xr.Dataset = xr.open_dataset(
@@ -922,6 +923,16 @@ def main() -> None:
             MESH_ELEMENT_AREA_ATTRS
         )
         del mesh_area_arr
+
+    # Drop indexes and then coordinates that were not present in the original
+    # mesh Dataset.
+    drop_indexes: set[str] = set(mesh_ds.indexes) - set(mesh_ds_original.indexes)
+    drop_coords = set(mesh_ds.coords) - set(mesh_ds_original.coords)
+    logger.info(
+        f'Dropping added indexes {drop_indexes} and coordinates '
+        f'{drop_coords}...'
+    )
+    mesh_ds = mesh_ds.drop_indexes(drop_indexes).drop_vars(drop_coords)
 
     logger.info(f'Writing output mesh file: {output_mesh_file}...')
     write_output_mesh_file(
