@@ -28,6 +28,21 @@
                 "--run-unsupported",
                 "--walltime", "0:30:00"
             ]
+        },
+        {
+            "name" : "Debug surfdata_land_frac_to_mesh_mask.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--mesh-file", "${workspaceFolder}/tempdata/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc",
+                "--surfdata-file", "${workspaceFolder}/tempdata/lnd/clm2/surfdata_esmf/surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.nc",
+                "--output-mesh-file", "${workspaceFolder}/tempdata/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc" //,
+                // "--surfdata-landfrac-vars", "LANDFRAC_PFT", "LANDFRAC_MKSURFDATA",
+                // "--add-element-areas", "False",
+                // "--log-level", "DEBUG"
+            ]
         }
     ]
 }
