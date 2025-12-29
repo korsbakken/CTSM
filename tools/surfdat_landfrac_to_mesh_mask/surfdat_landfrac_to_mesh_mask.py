@@ -751,25 +751,25 @@ def main() -> None:
         )
     )
     parser.add_argument(
-        '--mesh_file',
+        '--mesh-file',
         type=Path,
         help='Path to the input mesh netCDF file.',
         required=True,
     )
     parser.add_argument(
-        '--surfdata_file',
+        '--surfdata-file',
         type=Path,
         help='Path to the input surface data netCDF file.',
         required=True,
     )
     parser.add_argument(
-        '--output_mesh_file',
+        '--output-mesh-file',
         type=Path,
         help='Path to the output mesh netCDF file.',
         required=True,
     )
     parser.add_argument(
-        '--surfdata_landfrac_vars',
+        '--surfdata-landfrac-vars',
         type=str,
         nargs='+',
         default=list(SURFDATA_LANDFRAC_VAR_NAMES),
