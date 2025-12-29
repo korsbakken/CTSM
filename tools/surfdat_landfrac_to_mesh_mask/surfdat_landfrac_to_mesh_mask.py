@@ -450,9 +450,16 @@ def compute_mesh_element_areas(
             suffix='.nc',
             prefix='temp_mesh_',
             delete=True,
+            mode='w+b'
         ) as temp_mesh_file:
             mesh_path = Path(temp_mesh_file.name)
-            mesh.to_netcdf(mesh_path)
+            write_output_mesh_file(
+                mesh,
+                output_path=mesh_path,
+                format='NETCDF4',
+                log_output_file=False,
+                clobber=True,  # The tempfile exists (with size 0), so must be clobbered
+            )
             mesh_obj: esmpy.Mesh = esmpy.Mesh(
                 filename=str(mesh_path),
                 filetype=esmpy.FileFormat.ESMFMESH,
@@ -481,6 +488,8 @@ def write_output_mesh_file(
     *,
     format: str | None = None,
     clobber: bool = False,
+    reset_indexes: Sequence[str] = (MESH_ELEMENT_DIM_NAME,),
+    log_output_file: bool = True,
 ) -> None:
     """Write a modified mesh Dataset to a new netCDF file.
 
@@ -496,6 +505,19 @@ def write_output_mesh_file(
         will attempt to infer and use the format of the original mesh file if
         `mesh_ds.encoding['source']` exists. Otherwise, `NETCDF4` will be used
         by default.
+    clobber : bool, optional
+        Whether to overwrite the output file if it already exists. By default
+        False.
+    reset_indexes : Sequence[str], optional
+        A sequence of dimension names for which to reset the index before
+        writing the output file. By default, the dimension corresponding to
+        elements in ECMF mesh files (i.e., `MESH_ELEMENT_DIM_NAME`) is reset.
+        As the time of writing, this is required for any dimension that has a
+        MultiIndex, since the current version of xarray (2025.12.0) does not
+        support writing MultiIndexes to netCDF files.
+    log_output_file : bool, optional
+        Whether to log the path to the output file (at level INFO). By default
+        True.
     """
     if format is None:
         source_path: str | None = mesh_ds.encoding.get('source', None)
@@ -541,11 +563,20 @@ def write_output_mesh_file(
             '"NETCDF4", "NETCDF4_CLASSIC", "NETCDF3_64BIT", or '
             '"NETCDF3_CLASSIC"'
         )
+    for dim_name in reset_indexes:
+        if dim_name in mesh_ds.indexes:
+            mesh_ds = mesh_ds.reset_index(dim_name)
+        else:
+            logger.warning(
+                f'Dimension "{dim_name}" not found in mesh Dataset indexes; '
+                'not resetting index.'
+            )
     mesh_ds.to_netcdf(
         path=output_path,
         format=format,
     )
-    logger.info(f'Wrote output mesh file to "{output_path}".')
+    if log_output_file:
+        logger.info(f'Wrote output mesh file to "{output_path}".')
 ###END def write_output_mesh_file
 
 
