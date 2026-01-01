@@ -21,7 +21,8 @@ project.
     - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
     - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
   - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
-  - [7. Move the generated files to inputdata folders and add to XML databases](#7-move-the-generated-files-to-inputdata-folders-and-add-to-xml-databases)
+  - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
+  - [8. Move the generated files to inputdata folders and add to XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to-xml-databases)
     - [1. Move the fles to an appropriate input data folder](#1-move-the-fles-to-an-appropriate-input-data-folder)
     - [2. Add the paths to the generated files to the XML databases](#2-add-the-paths-to-the-generated-files-to-the-xml-databases)
 - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
@@ -462,7 +463,60 @@ and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
 the grid used in the November 2025 run, these should be roughly 800 MB and 7.3
 GB, respectively.
 
-### 7. Move the generated files to inputdata folders and add to XML databases
+### 7. Add land mask and grid cell areas to the mesh file
+
+The SCRIP grid file and the ESMF mesh file that were created in the first steps
+contain only a trivial mask (1 everywhere, not just in grid cells that contain
+land) and no field for grid cell areas. In this step we use the land fraction
+data in the generated surface data file to derive a land mask, compute the grid
+cell areas, and add both to the mesh file. This is done using a tool that has
+been added in the `/tools` directory of the CTSM repo from the same branch were
+this README was added, under
+[/tools/surfdat_landfrac_to_mesh_mask/](./tools/surfdat_landfrac_to_mesh_mask/).
+
+Before proceeding, ensure that you are in a shell where the Python environment
+has been activated, by running `pixi shell` in the CTSM repo folder as advised
+in step 1 above.
+
+To avoid having to type a potentially very long command in the next step, set an
+environment variable with the path to the surfdat_landfrac_to_mesh_mask tool as
+follows:
+```
+masktooldir="$(pwd)/tools/surfdat_landfrac_to_mesh_mask"
+```
+This assumes that you are in the root folder of the CTSM repo. If not, replace
+`$(pwd)` with the path to the CTSM repo root.
+
+Then set an environment variable with the path to the generated surface data
+file:
+```
+surfdatafilepath="$(pwd)/tools/mksurfdata_esmf/surfdatafilename.nc"
+```
+Replace `surfdatafilename.nc` with the actual file name of the surface data file
+that was generated in the previous step. The value above assumes that you are in
+the root folder of the CTSM repo, and that the surface data file is still in the
+`/tools/mksurfdata_esmf` folder under that root folder. Adjust the path if this
+is not the case.
+
+Then go to the folder that the mesh file was moved to (which
+was `/cluster/shared/noresm/inputdata/cicero_mods/share/meshes/` on betzy, when
+following the steps above).
+
+In the folder of the mesh file, give the following command to generate a land
+mask and grid cell areas and output a new mesh file with both added to the
+original:
+```
+"${masktooldir}/surfdat_landfra_to_mesh_mask" \
+    --mesh-file ./ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc  \
+    --surfdata-file "${surfdatafilepath}" \
+    --output-mesh-file ./ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc
+```
+Adjust the file name after `--mesh-file ./` to match the actual name of the
+preliminary mesh file you generated. If desired, also modify the file name after
+`--output-mesh-file` to match the file name that you want for the output mesh
+file with added land mask and grid cell areas.
+
+### 8. Move the generated files to inputdata folders and add to XML databases
 
 Do the two following steps to use the generated input files (the last one is
 required only for later convenience):
