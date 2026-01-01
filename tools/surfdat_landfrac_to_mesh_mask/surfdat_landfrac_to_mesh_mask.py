@@ -132,9 +132,6 @@ import sys
 import tempfile
 import typing as tp
 
-import netCDF4 as nc4
-import xarray as xr
-
 
 
 logger: tp.Final[logging.Logger] = logging.getLogger(__name__)
@@ -201,7 +198,7 @@ _UNITS_ATTR_NAME: tp.Final[str] = 'units'
 
 
 def make_latlon_1d_indexed(
-    ds: xr.Dataset,
+    ds: 'xr.Dataset',
     *,
     input_index_dim: str,
     output_index_dim: str | None = None,
@@ -210,7 +207,7 @@ def make_latlon_1d_indexed(
     input_multidim_index_var_name: str | None = None,
     input_multidim_index_coord_dim_name: str | None = None,
     input_multidim_index_coord_indices: Mapping[CoordDim, int] | None = None,
-) -> xr.Dataset:
+) -> 'xr.Dataset':
     """Add a coordinate index with longitude and latitude coordinates as levels
     to a Dataset that has a 1D element-based dimension and longitudes/latitudes
     either as two separate variables or as components along a coordinate
@@ -342,13 +339,13 @@ def make_latlon_1d_indexed(
 
 
 def create_land_mask_from_landfrac(
-    source_ds: xr.Dataset,
+    source_ds: 'xr.Dataset',
     *,
     landfrac_var_names: tp.Sequence[str] = SURFDATA_LANDFRAC_VAR_NAMES,
     landmask_var_name: str = MESH_MASK_VAR_NAME,
     landfrac_threshold: float = 0.0,
     land_mask_attrs: dict[str, tp.Any] | None = None,
-) -> xr.DataArray:
+) -> 'xr.DataArray':
     """Create a land mask DataArray from land fraction variables in a surface
     data Dataset. By default, points with land fraction values greater than 0.0
     for any listed land fraction variable are considered land. The threshold
@@ -405,12 +402,12 @@ def create_land_mask_from_landfrac(
 
 
 def compute_mesh_element_areas(
-    mesh: xr.Dataset | Path | str,
+    mesh: 'xr.Dataset | Path | str',
     *,
     mesh_element_dim_name: str = MESH_ELEMENT_DIM_NAME,
     mesh_area_var_name: str = MESH_ELEMENT_AREA_VAR_NAME,
     mesh_area_attrs: dict[str, str] = MESH_ELEMENT_AREA_ATTRS,
-) -> xr.DataArray:
+) -> 'xr.DataArray':
     """Compute the area of each element in a mesh Dataset.
 
     Note that the function relies on creating an `esmpy.Mesh` object from file
@@ -439,6 +436,7 @@ def compute_mesh_element_areas(
         DataArray will not have any coordinates or an index. These must be added
         from the original mesh Dataset if needed.
     """
+    import xarray as xr
     import esmpy
     if isinstance(mesh, (str, Path)):
         mesh_obj: esmpy.Mesh = esmpy.Mesh(
@@ -482,7 +480,7 @@ def compute_mesh_element_areas(
 
 
 def write_output_mesh_file(
-    mesh_ds: xr.Dataset,
+    mesh_ds: 'xr.Dataset',
     output_path: Path|str,
     *,
     format: str | None = None,
@@ -518,6 +516,7 @@ def write_output_mesh_file(
         Whether to log the path to the output file (at level INFO). By default
         True.
     """
+    import netCDF4 as nc4  # Lazy import in this function, since only needed here and may take time on slow NFS systems.
     if format is None:
         source_path: str | None = mesh_ds.encoding.get('source', None)
         if source_path is not None:
@@ -644,8 +643,8 @@ class MeshCenterCoordsVarExistsError(ValueError):
 
 
 def lonlat2d_to_mesh_coords(
-    lonlat_ds: xr.Dataset,
-    mesh_ds: xr.Dataset | None = None,
+    lonlat_ds: 'xr.Dataset',
+    mesh_ds: 'xr.Dataset | None' = None,
     *,
     lon_var_name: str = 'LONGXY',
     lat_var_name: str = 'LATIXY',
@@ -655,7 +654,7 @@ def lonlat2d_to_mesh_coords(
     mesh_element_dim_name: str = MESH_ELEMENT_DIM_NAME,
     mesh_coord_dim_name: str = MESH_COORD_DIM_NAME,
     keep_lon_lat_vars: bool = True,
-) -> xr.Dataset:
+) -> 'xr.Dataset':
     """Convert an xarray Dataset with 2D longitude and latitude dimensions to
     the 1D element-based coordinate system used in a mesh Dataset.
 
@@ -720,6 +719,7 @@ def lonlat2d_to_mesh_coords(
         provided, the mapping will be aligned to the element ordering in
         `mesh_ds`.
     """
+    import xarray as xr
     if (
             mesh_center_coords_var_name in lonlat_ds.variables
             or mesh_center_coords_var_name in lonlat_ds.dims
@@ -830,6 +830,7 @@ def main() -> None:
     mesh_mask_var_name: str = MESH_MASK_VAR_NAME
     mesh_element_area_var_name: str = MESH_ELEMENT_AREA_VAR_NAME
 
+    import xarray as xr
     logger.info(f'Opening mesh file: {mesh_file}...')
     mesh_ds: xr.Dataset = xr.open_dataset(
         mesh_file,
@@ -946,6 +947,9 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
+# Retroactive import, to make sure the type annotations can be resolved.
+import xarray as xr
 
     # ###
     # Code to move to new function to align mesh datasets, or to create lon/lat
