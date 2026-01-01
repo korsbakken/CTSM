@@ -110,6 +110,13 @@ This step requires installing and activating the Python environment specified in
 1. `pixi install`
 2. `pixi shell`
 
+`pixi.toml` contains both the dependencies of the main CTSM Python environment
+as specified in [/python/conda_env_ctsm_py.yml](./python/conda_env_ctsm_py.yml)
+and some additional dependencies that are required for other steps in this
+guide (notably using
+[/tools/surfdat_landfrac_to_mesh_mask.py](./tools/surfdat_landfrac_to_mesh_mask/surfdat_landfrac_to_mesh_mask.py)
+to add a land mask and cell areas to the mesh file).
+
 Creating the SCRIP grid file only requires the `ncl` package in the Python
 environment and its dependencies. But if you also want to use the packages in
 the dev environment, then replace the last command with `pixi shell -e dev`.
