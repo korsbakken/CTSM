@@ -9,7 +9,7 @@ project.
 - [Definition of the grid](#definition-of-the-grid)
 - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
   - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
-  - [2. Create the mesh file](#2-create-the-mesh-file)
+  - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
   - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
     - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
     - [Add mesh file path to the nuopc component/model grid definition files](#add-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
@@ -96,9 +96,10 @@ The current workflow appears to be:
         to create job script to run mksurfdata\_esmf.
 5. Download missing raw input data, using the generated scripts and namelists.
 6. Run mksurfdata using the job scripts. Download missing input data as needed.
-7. Move the generated data files to appropriate input data folders, and add them
+7. Add land mask and grid cell areas to the mesh file.
+8. Move the generated data files to appropriate input data folders, and add them
    to the XML databases.
-8. [Add summary of how to add the atmospheric forcing, and any custom bullets on
+9. [Add summary of how to add the atmospheric forcing, and any custom bullets on
    the river transport model].
 
 ### 1. Create the SCRIP grid file
@@ -133,14 +134,21 @@ data files when generating the surface data set.
 On betzy, the SCRIP file was moved from `${CTSMROOT}/tools/mkmapgrids/` to
 `/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/`.
 
-### 2. Create the mesh file
+### 2. Create a (preliminary) mesh file with triival mask
 
-The SCRIP grid file from the previous file is used to produce a mesh file with
-the following commands, where `[ESMF_module]` is replaced with a suitable module
-that enables the `ESMF_Scrip2Unstruct` command, `[scrip_file]` is replaced by
-the full path to the SCRIP file from the previous section, and
-`[output_esmf_file]` is replaced with the desired path and name of the output
-ESMF mesh file):
+The SCRIP grid file from the previous file is used to produce a mesh file with a
+trivial mask (1 everywhere), and without a field for the grid cell areas (since
+the SCRIP file from the previous step does not contain one). We need a mesh file
+to create the surface data set, but the surface data contains its own land
+fraction data and does not need a mask. We will then later use the surface data
+set to add a land mask to the mesh file, and at the same time compute and add
+grid cell areas.
+
+The preliminary mesh file is produced with the following commands, where
+`[ESMF_module]` is replaced with a suitable module that enables the
+`ESMF_Scrip2Unstruct` command, `[scrip_file]` is replaced by the full path to
+the SCRIP file from the previous section, and `[output_esmf_file]` is replaced
+with the desired path and name of the output ESMF mesh file):
 
 ```
 module load [ESMF_module]
@@ -160,15 +168,6 @@ On betzy, the following commands were used after changing to the directory
 module load ESMF/8.8.0-iomkl-2022a-ParallelIO-2.6.5
 ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.125x0.125_nomask_c251026.nc ../meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc 0
 ```
-
-**NB!** This step does not add an area field (`elementArea`) to the mesh file.
-We may need to do this later. Since we use a rectangular grid with constant
-sides in lat-lon space, the formula for the areas measured in `radians^2` should
-be `0.125 * [ sin(\theta+0.0625) - sin(\theta-0.0625) ] / (4*\pi)`, where
-`\theta` is the latitude in degrees, and the `sin` function should take its
-argument in degrees (need to convert the argument if not). The added/subtracted
-number in the sine function is half the grid spacing. Scale the numbers `0.125`
-and `0.0625` accordingly if using a different grid spacing than `0.125` degrees.
 
 ### 3. Add new resolution and grid to config files
 
@@ -450,16 +449,16 @@ rectified by manually changing the `YEAR` and/or `time` variable to have the
 correct values.
 ***
 
-
-### 7. Move the generated files to inputdata folders and add to XML databases
-
 If the `mksurfdata` job finishes successfully, it will put a surface data file
 and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
 `surfdata_*_cYYMMDD.nc` and `landuse.timeseries_*_cYYMMDD.nc`, respectively. For
 the grid used in the November 2025 run, these should be roughly 800 MB and 7.3
 GB, respectively.
 
-Do the two following steps (the last one is required only for later convenience):
+### 7. Move the generated files to inputdata folders and add to XML databases
+
+Do the two following steps to use the generated input files (the last one is
+required only for later convenience):
 
 #### 1. Move the fles to an appropriate input data folder
 
