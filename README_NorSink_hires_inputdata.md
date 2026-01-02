@@ -12,7 +12,7 @@ project.
   - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
   - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
     - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
-    - [Add mesh file path to the nuopc component/model grid definition files](#add-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
+    - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
   - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
     - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
     - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
@@ -22,9 +22,10 @@ project.
     - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
   - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
   - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
-  - [8. Move the generated files to inputdata folders and add to XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to-xml-databases)
-    - [1. Move the fles to an appropriate input data folder](#1-move-the-fles-to-an-appropriate-input-data-folder)
-    - [2. Add the paths to the generated files to the XML databases](#2-add-the-paths-to-the-generated-files-to-the-xml-databases)
+  - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
+    - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
+    - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
+    - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
 - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
   - [1. Create the test case](#1-create-the-test-case)
 
@@ -192,7 +193,7 @@ list (without any added spaces) in the `valid_values=` attribute.
 On Betzy, the name `NorwayRect_0.125x0.125` was added. This will be used in the
 remainder of this guide.
 
-#### Add mesh file path to the nuopc component/model grid definition files
+#### Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files
 
 In `/ccs_config/component_grids_nuopc.xml` add a `<domain>` with the mesh file
 from point 2 in the `<domains>` section. The following tag was added on betzy
@@ -206,11 +207,16 @@ from point 2 in the `<domains>` section. The following tag was added on betzy
   </domain>
 ```
 
+(Note that this is not really the file we will use, it is only used for
+generating the surface data files below. The mesh file we will use for creating
+and running cases will be a derived mesh file created later, where we use the
+land fractions from the surface data file to add a land mask.)
+
 Then add aliases for the grid name in `/ccs_config/modelgrid_aliases_nuopc.xml`.
 The following was added on betzy:
 
 ```
-  <model_grid alias="NorwayRect_0.125x0.125">
+  <model_grid alias="NorwayRect0.125">
     <grid name="atm">NorwayRect_0.125x0.125</grid>
     <grid name="lnd">NorwayRect_0.125x0.125</grid>
     <grid name="ocnice">NorwayRect_0.125x0.125</grid>
@@ -516,16 +522,17 @@ preliminary mesh file you generated. If desired, also modify the file name after
 `--output-mesh-file` to match the file name that you want for the output mesh
 file with added land mask and grid cell areas.
 
-### 8. Move the generated files to inputdata folders and add to XML databases
+### 8. Move the generated files to inputdata folders and add to / adjust XML databases
 
 Do the two following steps to use the generated input files (the last one is
 required only for later convenience):
 
-#### 1. Move the fles to an appropriate input data folder
+#### 1. Move the surface data files to an appropriate input data folder
 
-Move these two files (and optionally also the log file) to the inputdata folder
-where you want to use them. There is no absolute requirement for where to place
-them, butthe data generated in November 2025 in NorSink on betzy were moved to
+Move the surface data and land use files generated above (and optionally also
+the log file) to the inputdata folder where you want to use them. There is no
+absolute requirement for where to place them, butthe data generated in November
+2025 in NorSink on betzy were moved to
 `/cluster/shared/noresm/inputdata/cicero_mods/surfdata_esmf/ctsm5.3.0/`.
 
 In general on betzy, we use folders under `/cluster/shared/noresm/inputdata/`
@@ -533,7 +540,42 @@ for input files that all noresm users on betzy should have access to, and
 specifically the subfolder `cicero_mods` for files that have been modified or
 created by CICERO for special purposes.
 
-#### 2. Add the paths to the generated files to the XML databases
+#### 2. Adjust the mask and mesh file config in the XML databases
+
+Now that we have generated a complete mesh file with land mask and grid cell
+areas, we need to adjust the preliminary grid and mesh file configurations we
+added to the XML databases in the previous steps.
+
+1. Change the mask in the grid alias definition: In
+   [`modelgrid_aliases_nuopc.xml](./ccs_config/modelgrid_aliases_nuopc.xml),
+   change `null` in `<mask>null</mask>` in the block you added previously to the
+   name of the grid. For the grid that was described for betzy above, the
+   `<model_grid>` block above then becomes:
+   ```
+   <model_grid alias="NorwayRect0.125">
+     <grid name="atm">NorwayRect_0.125x0.125</grid>
+     <grid name="lnd">NorwayRect_0.125x0.125</grid>
+     <grid name="ocnice">NorwayRect_0.125x0.125</grid>
+     <mask>NorwayRect_0.125x0.125</mask>
+   </model_grid>
+   ```
+   where the `<mask>` tag on the penultimate line has been changed.
+
+2. Change the mesh file name in the domain definition: In
+   [`component_grids_nuopc.xml`](./ccs_config/component_grids_nuopc.xml), change
+   the path of the mesh file (in the `<mesh>` tag) to the modified mesh file
+   that you generated with `surfdat_landfrac_to_mesh_mask.sh` above. With the
+   settings above, the domain block for the grid then becomes:
+   ```
+   <domain name="NorwayRect_0.125x0.125">
+     <nx>217</nx>  <ny>112</ny>
+     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc</mesh>
+     <desc>0.125x0.125 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
+   </domain>
+   ```
+   where the `<mesh>` tag in the third line was changed.
+
+#### 3. Add the paths to the generated surfacedata and land use files to the XML databases
 
 In order to use the new grid and the new input data files in scripts such as
 `create_newcase`, they need to be added to
