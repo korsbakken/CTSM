@@ -506,7 +506,7 @@ In the folder of the mesh file, give the following command to generate a land
 mask and grid cell areas and output a new mesh file with both added to the
 original:
 ```
-"${masktooldir}/surfdat_landfra_to_mesh_mask" \
+"${masktooldir}/surfdat_landfrac_to_mesh_mask.sh" \
     --mesh-file ./ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc  \
     --surfdata-file "${surfdatafilepath}" \
     --output-mesh-file ./ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc
