@@ -48,7 +48,7 @@
             "name": "Debug create_newcase",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/cime/create_newcase",
+            "program": "${workspaceFolder}/cime/scripts/create_newcase",
             "console": "integratedTerminal",
             "cwd": "/cluster/work/users/janko/noresm/cases",
             "args": [
