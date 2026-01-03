@@ -637,7 +637,7 @@ with the name of your new grid if you chose a different name, and
 create_newcase \
   --case test_NorwayRect_simple_case \
   --compset '1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV' \
-  --res 'a%NorwayRect_0.125x0.125_l%NorwayRect0.125x0.125_r%r05_g%gland4_oi%null_w%null_z%null_m%NorwayRect0.125x0.125' \
+  --res 'a%NorwayRect_0.125x0.125_l%NorwayRect_0.125x0.125_r%r05_g%gland4_oi%null_w%null_z%null_m%NorwayRect_0.125x0.125' \
   --machine betzy \
   --project nn9188k \
   --run-unsupported \
