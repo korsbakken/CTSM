@@ -29,6 +29,8 @@ project.
 - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
   - [1. Create the test case](#1-create-the-test-case)
   - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
+  - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
+  - [4. Build the case for run](#4-build-the-case-for-run)
 
 
 ## Definition of the grid
@@ -660,4 +662,25 @@ the remaining steps.
 
 ### 2. Check and adjust config parameters
 
+*At the moment, nothing was done in this step*
 
+### 3. Initialize the case with `case.setup`
+
+Give the following command to set up the case and prepare for build:
+```
+./case.setup --verbose --debug
+```
+
+The `--verbose` and `--debug` options are optional. The latter will write very
+detailed information to `case.setup.log`.
+
+### 4. Build the case for run
+
+Give the following command to start the build (can take a long time):
+```
+./case.build --verbose --debug
+```
+
+If you have run a build previously, you may need to clean it up by first running
+`./case.build --clean-all` and then `./case.setup` again, before issuing the
+`./case.build` above.
