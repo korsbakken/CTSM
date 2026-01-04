@@ -28,6 +28,7 @@ project.
     - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
 - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
   - [1. Create the test case](#1-create-the-test-case)
+  - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
 
 
 ## Definition of the grid
@@ -628,7 +629,7 @@ used for spinup with DATM (`CPLHIST`). The land and atmosphere model are run on
 the new grid, the river model on the `r05` grid, and other model on a `null`
 grid (being stubs). The overall mask is set to that of the new grid.
 
-To to the directory where you want to create the new case directory as a
+Go to the directory where you want to create the new case directory as a
 subdirectory and give the following command (replace `NorwayRect_0.125x0.125`
 with the name of your new grid if you chose a different name, and
 `test_NorwayRect_simple_case` with a different case name if desired):
@@ -643,4 +644,20 @@ create_newcase \
   --run-unsupported \
   --walltime '0:30:00'
 ```
+
+Note that depending on your settings, the case directory may not have been
+created under your current working directory (where you issued the
+`create_newcase`) command, but rather under the directory specified by the
+`<CIME_OUTPUT_ROOT>` tag in your `config_machines.xml` file. On betzy, the
+default config file under
+[`/ccs_config/machines/betzy/config_machines.xml`](./ccs_config/machines/betzy/config_machines.xml)
+sets `<CIME_OUTPUT_ROOT>` to `/cluster/work/users/$USER/noresm` (where the path
+here is absolute, not relative to the CTSM repo root, and `$USER` is replaced by
+your username when running).
+
+After create\_newcase has completed, cd into the new case directory to complete
+the remaining steps.
+
+### 2. Check and adjust config parameters
+
 
