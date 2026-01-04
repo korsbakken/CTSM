@@ -50,7 +50,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/cime/scripts/create_newcase",
             "console": "integratedTerminal",
-            "cwd": "/cluster/work/users/janko/noresm/cases",
+            "cwd": "/cluster/work/users/janko/noresm",
             "args": [
                 "--case", "test_NorwayRect_simple_case",
                 "--compset", "1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV",
