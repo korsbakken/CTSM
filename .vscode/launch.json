@@ -53,14 +53,32 @@
             "cwd": "/cluster/work/users/janko/noresm",
             "args": [
                 "--case", "test_NorwayRect_simple_case",
-                "--compset", "1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV",
-                "--res", "a%NorwayRect_0.125x0.125_l%NorwayRect_0.125x0.125_r%r05_g%gland4_oi%null_w%null_z%null_m%NorwayRect_0.125x0.125",
+                "--compset", "1850_DATM%CPLHIST_CLM50%BGC_SICE_SOCN_MOSART_SGLC_SWAV",
+                "--res", "a%NorwayRect_0.125x0.125_l%NorwayRect_0.125x0.125_r%r05_g%null_oi%null_w%null_z%null_m%NorwayRect_0.125x0.125",
                 "--machine", "betzy",
                 "--project", "nn9188k",
                 "--run-unsupported",
                 "--walltime", "0:30:00",
                 "--verbose"
             ]
+        },
+        {
+            "name": "Debug case.build",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${input:caseFolder}/case.build",
+            "console": "integratedTerminal",
+            "cwd": "${input:caseFolder}",
+            "args": [
+                "--verbose"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "caseFolder",
+            "type": "promptString",
+            "description": "Absolute path to the folder of a CIME case",
         }
     ]
 }
