@@ -662,7 +662,8 @@ the remaining steps.
 
 ### 2. Check and adjust config parameters
 
-*At the moment, nothing was done in this step*
+*NEED TO DESCRIBE FORCE COLD START, AND HOW NOT DOING SO CAUSES FAILURE WHEN
+INTERPOLATING INITIAL CONDITIONS FILE, BUT FAILS IF ALSO TRIES ACCELERATED SPINUP.*
 
 ### 3. Initialize the case with `case.setup`
 
