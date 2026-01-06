@@ -37,6 +37,7 @@ ctsm = { path = "./python", editable = true }
 [feature.dev.dependencies]
 ipython = "*"
 ipykernel = ">=7.1.0"
+jupyter_bokeh = ">=4.0.5"
 
 [environments]
 dev = ["dev"]
