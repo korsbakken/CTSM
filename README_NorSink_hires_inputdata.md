@@ -29,8 +29,12 @@ project.
 - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
   - [1. Create the test case](#1-create-the-test-case)
   - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
+    - [a. Force a cold start](#a-force-a-cold-start)
+    - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
+    - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
   - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
   - [4. Build the case for run](#4-build-the-case-for-run)
+  - [5. Submit](#5-submit)
 
 
 ## Definition of the grid
@@ -662,8 +666,64 @@ the remaining steps.
 
 ### 2. Check and adjust config parameters
 
-*NEED TO DESCRIBE FORCE COLD START, AND HOW NOT DOING SO CAUSES FAILURE WHEN
-INTERPOLATING INITIAL CONDITIONS FILE, BUT FAILS IF ALSO TRIES ACCELERATED SPINUP.*
+Parameters can be changed at ths stage with `./xmlchange` and inspected with
+`./xmlquery`, when located in the case directory.
+
+#### a. Force a cold start
+
+We need to change parameters to force CTSM to make a cold start rather than try
+to start from initial conditions, since we presumably don't have an initial
+conditions or restart file at the right resolution at this point. In principle,
+it seems that CESM should interpolate a provided initial conditions file
+automatically, but this produces an error at runtime if we go with the defaults
+(maybe issues related to using a stub ice sheet model, or some other issue with
+the non-CTSM parts of the model?).
+
+Also, we presumably want to do a spinup and not start from initial conditions
+(?).
+
+Change the relevant option with the following:
+```
+./xmlchange CLM_FORCE_COLDSTART=on
+```
+
+To do a proper spinup, we might also want to set `CLM_ACCELERATED_SPINUP` to
+`on` to do an initial accelerated spinup. Unfortunately doing so produces an
+error when running `./case.build`. If we want to do accelerated spinup and the
+error persists in production cases, the cause of that error will need to be
+investigated further (wasn't investigated further for this test case).
+
+#### b. Adjust the length of the run
+
+Set the length of the run (in model time) by setting `STOP_N` to the nunmber of
+model days to run before stopping, and/or optionally change `STOP_OPTION` to a
+different unit (e.g., `nmonths`). The default is 5 days (`STOP_OPTION=ndays` and
+`STOP_N=5`).
+
+To test output of monthly history files, we set the run time to 3 months. On
+betzy, anything up to at least 6-9 months should fit confortably within the
+30-minute wall time that gets allocated with the default settings (in the
+"devel" queue for short development runs).
+
+```
+./xmlchange STOP_OPTION=nmonths
+./xmlchange STOP_N=3
+```
+
+Note that these options can be changed at any time before running
+`./case.submit`.
+
+#### c. Set output interval for history files
+
+The default settings do not output any history files. For this test run, we set
+monthly outputs, which gives us three history files with the 3-month run length
+above (but you can choose any interval that is shorter than the total run
+length).
+
+```
+./xmlchange HIST_OPTION=nmonths
+./xmlchange HIST_N=1
+```
 
 ### 3. Initialize the case with `case.setup`
 
@@ -685,3 +745,20 @@ Give the following command to start the build (can take a long time):
 If you have run a build previously, you may need to clean it up by first running
 `./case.build --clean-all` and then `./case.setup` again, before issuing the
 `./case.build` above.
+
+After having done this, you can inspect the various namelists and input file
+specifications that have been generated in the `Buildconf` directory under the
+case directory.
+
+### 5. Submit 
+
+Submit the case as follows (with `--verbose` and especially `--debug` being
+optional):
+```
+./case.submit --verbose --debug
+```
+
+Once the job starts, it should run for the number of days specified by the
+`STOP_N` parameter (can be inspected with `./xmlquery STOP_N` and changed with
+`./xmlchange STOP_N=n` prior to running `case.build`), or a corresponding number
+of months or other time unit if you changed `STOP_OPTION`.
