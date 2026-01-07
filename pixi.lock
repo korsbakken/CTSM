@@ -704,6 +704,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/nbclient-0.10.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/nbconvert-core-7.16.6-pyhcf101f3_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/nbformat-5.10.4-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/nc-time-axis-1.4.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ncl-6.6.2-h7a63124_57.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ncurses-6.5-h2d0b736_3.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/nest-asyncio-1.6.0-pyhd8ed1ab_1.conda
@@ -1768,6 +1769,11 @@ packages:
   purls: []
   size: 48369
   timestamp: 1765019689213
+- pypi: ./python
+  name: ctsm
+  version: 0.0.0
+  sha256: 0b5f0d98b409d9da099a7c73dab21a9ce80cff3e453eb9838ae4a87832a02124
+  editable: true
 - pypi: ./python
   name: ctsm
   version: 0.0.0
@@ -5147,6 +5153,20 @@ packages:
   - pkg:pypi/nbformat?source=hash-mapping
   size: 100945
   timestamp: 1733402844974
+- conda: https://conda.anaconda.org/conda-forge/noarch/nc-time-axis-1.4.1-pyhd8ed1ab_1.conda
+  sha256: 59c43a84c80b1e9b9271fb73c495591004e243f1ee2b1dbe79f90685d2579e6f
+  md5: 9a2be7d0089f5934b550933ca0d9fe85
+  depends:
+  - cftime >=1.5
+  - matplotlib-base
+  - numpy
+  - python >=3.9
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/nc-time-axis?source=hash-mapping
+  size: 20273
+  timestamp: 1734603415168
 - conda: https://conda.anaconda.org/conda-forge/linux-64/ncl-6.6.2-h7a63124_57.conda
   sha256: 276f9f148e72904e6154ceec17927f97924d9ecf9c7fd45ba84a92224e94578a
   md5: 6f1ee8b03ebe2706c168504103590955
