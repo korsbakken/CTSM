@@ -455,7 +455,7 @@ particular, check the following:
    `time srun ...` and containing a path to `mksurfdata`). In the example job
    script used by `janko` in this branch, there are absolute paths to the
    location of the repo in the home folder of the user `janko` on these lines,
-   and they must be chaned to the absolute paths of `.env_mach_specific.sh`` and
+   and they must be changed to the absolute paths of `.env_mach_specific.sh`` and
    `mksurfdata` under the `mksurfdata_esmf` folder where you have your clone of
    the repo.
 2. **That the `SBATCH` parameters at the top of the job script are appropriate.**
@@ -472,7 +472,7 @@ particular, check the following:
    #SBATCH --job-name=mksurfdata_esmf
    #SBATCH --qos=preproc
    #SBATCH --partition=preproc
-   #SBATCH --time=17:00:00
+   #SBATCH --time=24:00:00
    #SBATCH --nodes=1
    #SBATCH --ntasks-per-node=128
    #SBATCH --cpus-per-task=1
