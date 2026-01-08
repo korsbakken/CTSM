@@ -143,7 +143,7 @@ the dev environment, then replace the last command with `pixi shell -e dev`.
 
 Then go to the directory `/tools/mkmapgrids/` and call the following command:
 
-`PRINT=TRUE PTNAME="NorwayRect_0.1x0.1" W_LON=4.0 E_LON=32.0 S_LAT=57.0 N_LAT=72.0 NX=281 NY=151 ncl ./mkscripgrid.ncl`
+`PRINT=TRUE PTNAME="NorwayRect_0.1x0.1" W_LON=3.95 E_LON=32.05 S_LAT=56.95 N_LAT=72.05 NX=281 NY=151 ncl ./mkscripgrid.ncl`
 
 See `/tools/mkmapgrids/README` for an explanation of the environment variables
 that are set prior the `ncl` command.
@@ -177,6 +177,7 @@ with the desired path and name of the output ESMF mesh file):
 
 ```
 module load [ESMF_module]
+
 ESMF_Scrip2Unstruct [scrip_file] [output_esmf_file] 0
 ```
 
@@ -191,7 +192,17 @@ On betzy, the following commands were used after changing to the directory
 
 ```
 module load ESMF/8.8.0-iomkl-2022a-ParallelIO-2.6.5
+
 ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260108.nc ../meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc 0
+```
+
+Note that if you get an error message about the ESMF module (or at least the
+specified version of it) being found on betzy, you may need to tell the module
+system to look for modules in the custom module library for noresm and then try
+again. On betzy, this was done with the following command:
+
+```
+module use /cluster/shared/noresm/eb_noresm3/modules/all/
 ```
 
 ### 3. Add new resolution and grid to config files
