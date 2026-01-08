@@ -1,9 +1,8 @@
 # Steps to produce high-resolution grid and input data for NorSink
 
 The following are notes and instructions for how to produce a high-resolution
-(0.125x0.125 degrees) grid for Norway and surrounding regions for use in
-NorSink, and input data for CLM/CTSM and accompanying models used in the
-project.
+(0.1x0.1 degrees) grid for Norway and surrounding regions for use in NorSink,
+and input data for CLM/CTSM and accompanying models used in the project.
 
 ## Contents
 - [Steps to produce high-resolution grid and input data for NorSink](#steps-to-produce-high-resolution-grid-and-input-data-for-norsink)
@@ -68,8 +67,8 @@ the Göta Älv. No rivers that carry water originating from Norway extend any
 further south than that.
 
 The grid is set to be the smallest grid that fulfills the criteria above, *and*
-that starts and ends on multiples of 0.125 degrees in both latitude and
-longitude.
+where the grid cell centers start and end on integer degrees in both latitude
+and longitude.
 
 These definitions produce the following limits for the grid:
 * **West**: 4.0 E (constrained by Steinsøyna in the Utvær archipelago, in Solund,
@@ -217,7 +216,7 @@ must be added to the entry `res`. Find the the XML `<entry>` tag that has the
 attribute `id="res"`, and add the new resolution name to the comma-separated
 list (without any added spaces) in the `valid_values=` attribute.
 
-On Betzy, the name `NorwayRect_0.125x0.125` was added. This will be used in the
+On Betzy, the name `NorwayRect_0.1x0.1` was added. This will be used in the
 remainder of this guide.
 
 #### Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files
@@ -282,7 +281,7 @@ as described previously, the namelist used by `mksurfdata` can be generated with
 the following command (while in the directory `/tools/mksurfdata_esmf/`):
 
 ```
-./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.125x0.125 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
+./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.1x0.1 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
 ```
 
 Replace `NorwayRect_0.1x0.1` with the desired resolution name if using a
@@ -607,8 +606,8 @@ added to the XML databases in the previous steps.
    ```
    <domain name="NorwayRect_0.1x0.1">
      <nx>281</nx>  <ny>151</ny>
-     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc</mesh>
-     <desc>0.125x0.125 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
+     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_lndmask_c251031.nc</mesh>
+     <desc>0.1x0.1 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
    </domain>
    ```
    where the `<mesh>` tag in the third line was changed.
@@ -628,7 +627,7 @@ specify them manually when creating a case):
    ```
 
 2. Add the path to the land use file in an `<flanduse>` field. For the
-   `NorwayRect_0.125x0.125` grid and files created in November 2025 on betzy,
+   `NorwayRect_0.1x0.1` grid and files created in November 2025 on betzy,
    the following lines were added:
    ```
    <flanduse_timeseries hgrid="NorwayRect_0.1x0.1" sim_year_range="1850-2023">
