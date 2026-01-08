@@ -32,6 +32,7 @@ project.
     - [a. Force a cold start](#a-force-a-cold-start)
     - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
     - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
+    - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
   - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
   - [4. Build the case for run](#4-build-the-case-for-run)
   - [5. Submit](#5-submit)
@@ -282,6 +283,9 @@ absolute paths to `/glade/campaign` (a data area at NCAR, presumably). This was
 corrected to relative paths that should give the correct paths in
 `surfdata.namelist` after running `gen_mksurfdata_namelist`, but check whether
 any absolute paths from NCAR's machines persist if you get error messages.
+
+**Update:** This error may have been fixed in a later update in the main branch
+(but not yet merged into the norsink inputdata branch at the time of writing).
 
 #### c. Create job script for `mksurfdata`
 
@@ -701,9 +705,9 @@ different unit (e.g., `nmonths`). The default is 5 days (`STOP_OPTION=ndays` and
 `STOP_N=5`).
 
 To test output of monthly history files, we set the run time to 3 months. On
-betzy, anything up to at least 6-9 months should fit confortably within the
-30-minute wall time that gets allocated with the default settings (in the
-"devel" queue for short development runs).
+betzy, anything up to around 6-9 months should fit within the 30-minute wall
+time that gets allocated with the default settings (in the "devel" queue for
+short development runs).
 
 ```
 ./xmlchange STOP_OPTION=nmonths
@@ -723,6 +727,22 @@ length).
 ```
 ./xmlchange HIST_OPTION=nmonths
 ./xmlchange HIST_N=1
+```
+
+#### d. Adjust start year and alignment year with forcing data
+
+By default, the model starts with year 1 (date `0001-01-01`), which can create
+some issues for plotting with the `cftime` library (and be confusing in
+general). In this run, we start at 2000 and also set the forcing data to start
+in the same year, so we can do the run in a time period where we have multiple
+forcing data sets available. Note that the surface data is still generated for
+1850, so results may not be expected to match those of a regular 2000 compset.
+
+```
+./xmlchange RUN_STARTDATE=2000-01-01
+./xmlchange DATM_YR_START=2000
+./xmlchange DATM_YR_ALIGN=2000
+./xmlchange DATM_YR_END=2023
 ```
 
 ### 3. Initialize the case with `case.setup`
