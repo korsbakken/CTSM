@@ -5,38 +5,36 @@ The following are notes and instructions for how to produce a high-resolution
 and input data for CLM/CTSM and accompanying models used in the project.
 
 ## Contents
-- [Steps to produce high-resolution grid and input data for NorSink](#steps-to-produce-high-resolution-grid-and-input-data-for-norsink)
-  - [Contents](#contents)
-  - [Definition of the grid](#definition-of-the-grid)
-  - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
-    - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
-    - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
-    - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
-      - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
-      - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
-    - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
-      - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
-      - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
-      - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
-    - [5. Download missing raw input data](#5-download-missing-raw-input-data)
-      - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
-      - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
-    - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
-    - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
-    - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
-      - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
-      - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
-      - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
-  - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
-    - [1. Create the test case](#1-create-the-test-case)
-    - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
-      - [a. Force a cold start](#a-force-a-cold-start)
-      - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
-      - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
-      - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
-    - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
-    - [4. Build the case for run](#4-build-the-case-for-run)
-    - [5. Submit](#5-submit)
+- [Definition of the grid](#definition-of-the-grid)
+- [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
+  - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+  - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
+  - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
+    - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
+    - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
+  - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
+    - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
+    - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
+    - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
+  - [5. Download missing raw input data](#5-download-missing-raw-input-data)
+    - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
+    - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
+  - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
+  - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
+  - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
+    - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
+    - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
+    - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
+- [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
+  - [1. Create the test case](#1-create-the-test-case)
+  - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
+    - [a. Force a cold start](#a-force-a-cold-start)
+    - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
+    - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
+    - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
+  - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
+  - [4. Build the case for run](#4-build-the-case-for-run)
+  - [5. Submit](#5-submit)
 
 
 ## Definition of the grid
@@ -325,13 +323,9 @@ and can take a long time to generate.
 The time is adjusted by changing the line that starts with `#SBATCH --time=`,
 and setting the requested wall time in format `h:mm:ss`.
 
-**NB! The times below are for generating the 0.125x0.125 degree grid in the
-original run in October/November. Needs to be updated for the 0.1x0.1 degree
-grid, which has 1.77 times as many grid cells.**
-
 In the run made by `korsbakken` on betzy, the surface data file itself was
 generated after less than 20 minutes, while processing data for the land use
-file took more than 4 minutes per year, and a total of 12.6 hours for the period
+file took more than 4 minutes per year, and a total of 12.7 hours for the period
 1850--2023.
 
 The job script included in the commit at the time of writing has the time
@@ -431,7 +425,7 @@ see below), and then manually change the affected paths in the following files:
 * The list of land use files (`landuse_timeseries_hist_*.txt`, where the `*`
   depends on the years and number of pfts).
 
-This problem did arise in the run on betzy in November 2025. This was "solved"
+This problem did arise in the run on betzy in January 2026. This was "solved"
 by creating a separate directory called `rawdata_norsink_tmp` under
 `/cluster/shared/noresm/inputdata/`, parallel to the main rawdata folder
 `/cluster/shared/noresm/inputdata/rawdata/`. If this folder is still there, it
@@ -460,11 +454,8 @@ particular, check the following:
    the repo.
 2. **That the `SBATCH` parameters at the top of the job script are appropriate.**
 
-   **NB! Edit the listing below, the date, and the comments about runtime after
-   having rerun for the 0.1x0.1 grid (relative to the 0.125x0.125 degree
-   grid).**
 
-   The following parameters were used for the run on betzy in November 2025, for
+   The following parameters were used for the run on betzy in January 2006, for
    generating both a surface data and land use file:
    ```
    #!/bin/bash
@@ -472,15 +463,15 @@ particular, check the following:
    #SBATCH --job-name=mksurfdata_esmf
    #SBATCH --qos=preproc
    #SBATCH --partition=preproc
-   #SBATCH --time=24:00:00
+   #SBATCH --time=17:00:00
    #SBATCH --nodes=1
    #SBATCH --ntasks-per-node=128
    #SBATCH --cpus-per-task=1
    #SBATCH --mem=175G
    ```
-   The actual run took 12.6 hours of wall time in total. The surface data file
-   was generated after about 15 minutes of runtime, the remaining time was spent
-   generating the land use file.
+   The actual run took 12.7 hours of wall time in total. The surface data file
+   was generated after just over 15 minutes of runtime, the remaining time was
+   spent generating the land use file.
 
 Then submit the job with the command `sbatch ./jobscriptname.sh` (replace
 `./jobscriptname.sh` with the actual path to your jobscript file) and wait for
@@ -503,8 +494,8 @@ correct values.
 If the `mksurfdata` job finishes successfully, it will put a surface data file
 and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
 `surfdata_*_cYYMMDD.nc` and `landuse.timeseries_*_cYYMMDD.nc`, respectively. For
-the grid used in the November 2025 run, these should be roughly 800 MB and 7.3
-GB, respectively.
+the 0.1x0.1 degree grid used in the January 2026 run, these should be roughly
+1.4 GB and 13 GB, respectively.
 
 ### 7. Add land mask and grid cell areas to the mesh file
 
@@ -568,8 +559,8 @@ required only for later convenience):
 
 Move the surface data and land use files generated above (and optionally also
 the log file) to the inputdata folder where you want to use them. There is no
-absolute requirement for where to place them, butthe data generated in November
-2025 in NorSink on betzy were moved to
+absolute requirement for where to place them, but the data generated in January
+2026 in NorSink on betzy were moved to
 `/cluster/shared/noresm/inputdata/cicero_mods/surfdata_esmf/ctsm5.3.0/`.
 
 In general on betzy, we use folders under `/cluster/shared/noresm/inputdata/`
@@ -627,8 +618,8 @@ specify them manually when creating a case):
    ```
 
 2. Add the path to the land use file in an `<flanduse>` field. For the
-   `NorwayRect_0.1x0.1` grid and files created in November 2025 on betzy,
-   the following lines were added:
+   `NorwayRect_0.1x0.1` grid and files created in January 2026 on betzy, the
+   following lines were added:
    ```
    <flanduse_timeseries hgrid="NorwayRect_0.1x0.1" sim_year_range="1850-2023">
    cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.1x0.1_hist_1850-2023_78pfts_c260108.nc</flanduse_timeseries>
