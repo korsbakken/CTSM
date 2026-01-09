@@ -5,36 +5,38 @@ The following are notes and instructions for how to produce a high-resolution
 and input data for CLM/CTSM and accompanying models used in the project.
 
 ## Contents
-- [Definition of the grid](#definition-of-the-grid)
-- [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
-  - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
-  - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
-  - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
-    - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
-    - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
-  - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
-    - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
-    - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
-    - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
-  - [5. Download missing raw input data](#5-download-missing-raw-input-data)
-    - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
-    - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
-  - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
-  - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
-  - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
-    - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
-    - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
-    - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
-- [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
-  - [1. Create the test case](#1-create-the-test-case)
-  - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
-    - [a. Force a cold start](#a-force-a-cold-start)
-    - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
-    - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
-    - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
-  - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
-  - [4. Build the case for run](#4-build-the-case-for-run)
-  - [5. Submit](#5-submit)
+- [Steps to produce high-resolution grid and input data for NorSink](#steps-to-produce-high-resolution-grid-and-input-data-for-norsink)
+  - [Contents](#contents)
+  - [Definition of the grid](#definition-of-the-grid)
+  - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
+    - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+    - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
+    - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
+      - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
+      - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
+    - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
+      - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
+      - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
+      - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
+    - [5. Download missing raw input data](#5-download-missing-raw-input-data)
+      - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
+      - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
+    - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
+    - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
+    - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
+      - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
+      - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
+      - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
+  - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
+    - [1. Create the test case](#1-create-the-test-case)
+    - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
+      - [a. Force a cold start](#a-force-a-cold-start)
+      - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
+      - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
+      - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
+    - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
+    - [4. Build the case for run](#4-build-the-case-for-run)
+    - [5. Submit](#5-submit)
 
 
 ## Definition of the grid
@@ -575,7 +577,7 @@ areas, we need to adjust the preliminary grid and mesh file configurations we
 added to the XML databases in the previous steps.
 
 1. Change the mask in the grid alias definition: In
-   [`modelgrid_aliases_nuopc.xml](./ccs_config/modelgrid_aliases_nuopc.xml),
+   [`modelgrid_aliases_nuopc.xml`](./ccs_config/modelgrid_aliases_nuopc.xml),
    change `null` in `<mask>null</mask>` in the block you added previously to the
    name of the grid. For the grid that was described for betzy above, the
    `<model_grid>` block above then becomes:
@@ -597,7 +599,7 @@ added to the XML databases in the previous steps.
    ```
    <domain name="NorwayRect_0.1x0.1">
      <nx>281</nx>  <ny>151</ny>
-     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_lndmask_c251031.nc</mesh>
+     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_lndmask_c260108.nc</mesh>
      <desc>0.1x0.1 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
    </domain>
    ```
