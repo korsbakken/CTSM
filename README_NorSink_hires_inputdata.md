@@ -37,6 +37,13 @@ and input data for CLM/CTSM and accompanying models used in the project.
     - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
     - [4. Build the case for run](#4-build-the-case-for-run)
     - [5. Submit](#5-submit)
+  - [Add and run with high-resolution ERA5 Land meteorological forcing data](#add-and-run-with-high-resolution-era5-land-meteorological-forcing-data)
+    - [1. Download the required ERA5 Land variables for the required region](#1-download-the-required-era5-land-variables-for-the-required-region)
+    - [2. Convert ERA5 Land grib files to DATM7 3-stream netCDF files](#2-convert-era5-land-grib-files-to-datm7-3-stream-netcdf-files)
+    - [3. Enter the new forcing data files in XML database files as new DATM streams](#3-enter-the-new-forcing-data-files-in-xml-database-files-as-new-datm-streams)
+      - [a. Add the mode and default settings for it in XML settings](#a-add-the-mode-and-default-settings-for-it-in-xml-settings)
+      - [b. Add streams for the mode in the namelist definition XML file](#b-add-streams-for-the-mode-in-the-namelist-definition-xml-file)
+      - [c. Define the streams and file locations / path patterns in the streams definition XML file](#c-define-the-streams-and-file-locations--path-patterns-in-the-streams-definition-xml-file)
 
 
 ## Definition of the grid
@@ -801,3 +808,84 @@ Once the job starts, it should run for the number of days specified by the
 `STOP_N` parameter (can be inspected with `./xmlquery STOP_N` and changed with
 `./xmlchange STOP_N=n` prior to running `case.build`), or a corresponding number
 of months or other time unit if you changed `STOP_OPTION`.
+
+
+## Add and run with high-resolution ERA5 Land meteorological forcing data
+
+The setup so far can be run as-is with existing metorological forcing data. But
+to match the higher resolution of the new grid, you will need higher-resolution
+metorological data streams than what is provided out of the box with the main
+CESM input data.
+
+In NorSink, we used data from the ERA5 Land data. This was processed into the
+same variables and three-stream data file setup that is used by the standard
+CRUNCEP and CRUJRA data modes in the DATM data-model, at native 0.1-degree and
+1-hour resolution (i.e., we rely on standard CESM routines to downscale the data
+to the model time step resolution). The processed data were entered into the
+CIME XML databases so that they can be used to set up cases automatically with
+`create_newcase`, with DATM mode `ERA5LANDNorwayRect` (the `NorwayRect`
+identifier is used to make it clear that the data only covers the region used in
+NorSink).
+
+### 1. Download the required ERA5 Land variables for the required region
+
+### 2. Convert ERA5 Land grib files to DATM7 3-stream netCDF files
+
+*The procedure for downloading and converting the ERA5 Land files will be
+described here later. Both are done using custom-made Python code, in the
+package [`era5land_to_datm`](https://github.com/ciceroOslo/era5land_to_datm).*
+
+*On Betzy, the converted data for the 0.1-degree grid covering Norway for
+NorSink is stored in
+`/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND.0.1d.NorwayRect.c260120`
+(each stream in a separate subfolder, `Precip1Hrly`, `Solar1Hrly`, and
+`TPQWL1Hrly`)*
+
+### 3. Enter the new forcing data files in XML database files as new DATM streams
+
+To use the new files as a DATM mode in compset names when using
+`create_newcase`, they must be defined as a new mode, with three new data
+streams, and the files and various attributes for each of those streams. Do this
+by adding to each XML file as specified below (*only pointers to locations are
+given for now, will be amended, in the meantime use `git diff` to see what
+changed*):
+
+*NB! The tuning mode (XML config option `LND_TUNING_MODE`) should be set
+according to the meteorological forcing used. There are modes for CRUJRA, but
+it's currently unclear what we should for the ERA5 Land data. There are also
+modes with `era5` in the name, but it's unclear whether this is adapted for the
+ERA5 Land data that we have downloaded (and appropriate for the regional grid),
+or whether it's used for the pre-existing ERA5 DATM mode that might be based on
+other data.*
+
+#### a. Add the mode and default settings for it in XML settings
+
+In `/components/cdeps/datm/cime_config/config_component.xml`, add a mode
+with compset identifier `ERA5LAND-NORWAYRECT` and mode name
+`ERA5LAND_NORWAYRECT` and suitable description and settings for it under:
+* `<description modifier_mode="1">` (the compset identifier)
+* `<entry id="DATM_MODE">` (mapping compset identifier to mode name)
+* `<entry id="DATM_YR_ALIGN">` (optional, but will probably need to be set
+  manually with `xmlchange` if not set. Requires specifying a compset pattern
+  match, which will include the compset identifier)
+* `<entry id="DATM_YR_START">`
+* `<entry id="DATM_YR_END">`
+
+#### b. Add streams for the mode in the namelist definition XML file
+
+In `/components/cdeps/datm/cime_config/namelist_definition.xml`:
+* add the mode as a value field `<value datm_mode="ERA5LAND_NORWAYRECT">` with
+streams `ERA5LAND_NORWAYRECT.Solar`, `ERA5LAND_NORWAYRECT.Precip`, and
+`ERA5LAND_NORWAYRECT.TPQW`.
+* add the mode as a valid mode in `valid_values` under `<entry id="datamode">`.
+
+#### c. Define the streams and file locations / path patterns in the streams definition XML file
+
+In `/components/cdeps/datm/cime_config/stream_definition.xml`, add a stream
+definition block (`<stream_entry name="...">`) for each of the three streams
+`ERA5LAND_NORWAYRECT.Solar`, `ERA5LAND_NORWAYRECT.Precip`, and
+`ERA5LAND_NORWAYRECT.TPQW`, with the correct path for each and file name
+patterns as follows:
+* `ERA5LAND_NORWAYRECT.Solar`: `clmforc.ERA5Land_NorwayRect0.1x0.1.Prec.%ym.nc`
+* `ERA5LAND_NORWAYRECT.Precip`: `clmforc.ERA5Land_NorwayRect0.1x0.1.Solr.%ym.nc`
+* `ERA5LAND_NORWAYRECT.TPQW`: `clmforc.ERA5Land_NorwayRect0.1x0.1.TPQWL.%ym.nc`
