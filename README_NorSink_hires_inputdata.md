@@ -1,82 +1,91 @@
 # Steps to produce high-resolution grid and input data for NorSink
 
 The following are notes and instructions for how to produce a high-resolution
-(0.125x0.125 degrees) grid for Norway and surrounding regions for use in
-NorSink, and input data for CLM/CTSM and accompanying models used in the
-project.
+(0.1x0.1 degrees) grid for Norway and surrounding regions for use in NorSink,
+and input data for CLM/CTSM and accompanying models used in the project.
 
 ## Contents
-- [Definition of the grid](#definition-of-the-grid)
-- [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
-  - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
-  - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
-  - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
-    - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
-    - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
-  - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
-    - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
-    - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
-    - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
-  - [5. Download missing raw input data](#5-download-missing-raw-input-data)
-    - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
-    - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
-  - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
-  - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
-  - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
-    - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
-    - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
-    - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
-- [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
-  - [1. Create the test case](#1-create-the-test-case)
-  - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
-    - [a. Force a cold start](#a-force-a-cold-start)
-    - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
-    - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
-    - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
-  - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
-  - [4. Build the case for run](#4-build-the-case-for-run)
-  - [5. Submit](#5-submit)
+- [Steps to produce high-resolution grid and input data for NorSink](#steps-to-produce-high-resolution-grid-and-input-data-for-norsink)
+  - [Contents](#contents)
+  - [Definition of the grid](#definition-of-the-grid)
+  - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
+    - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+    - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
+    - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
+      - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
+      - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
+    - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
+      - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
+      - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
+      - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
+    - [5. Download missing raw input data](#5-download-missing-raw-input-data)
+      - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
+      - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
+    - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
+    - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
+    - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
+      - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
+      - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
+      - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
+  - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
+    - [1. Create the test case](#1-create-the-test-case)
+    - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
+      - [a. Force a cold start](#a-force-a-cold-start)
+      - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
+      - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
+      - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
+    - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
+    - [4. Build the case for run](#4-build-the-case-for-run)
+    - [5. Submit](#5-submit)
 
 
 ## Definition of the grid
 
-The grid is defined to be a 0.125x0.125 degree grid that is quadratic in
+The grid is defined to be a 0.1x0.1 degree grid that is quadratic in
 latitude/longitude space and includes all of the Norwegian mainland and adjacent
 islands, as well as the course of any rivers that can transport
 carbon-containing material from Norwegian territory until they drain into the
-ocean.
+ocean. The resolution is chosen to match that of the raw data from the ERA5 Land
+metorological dataset, which will be used for atmospheric forcing.
 
-Towards the west, north and east, this is achieved by setting longitude/latitude
-limits that enclose Norway itself, since Norway has no land borders to the west
-or north, and no rivers that flow out from Norway (all of which flow into
-Sweden) extend further east than to the bay of Bothnia, which is entirely
+For convenience, we choose the borders so that the corner grid cells are
+centered on integer degrees (the actual edges will then be 0.05 degrees outside
+of that). This is is not a firm requirement that is imposed by the definition,
+but made for convenience. The ERA5 Land dataset has grid cell points at integer
+multiples of 0.1 degrees, so any corners with coordinates that are integer
+multiples of 0.1 degrees and otherwise fulfill the definition would also work.
+
+Towards the west, north and east, the requirements are fulfilled by setting
+longitude/latitude limits that enclose Norway itself. Norway has no land borders
+to the west or north, and no rivers that flow out from Norway (all of which flow
+into Sweden) extend further east than to the bay of Bothnia, which is entirely
 contained within any rectangular region that includes all of Norway. To the
 south, the grid must be extended to where the southernmost course of the Göta
-Älv drains into Kattegat at Gothenburg, since some rivers in eastern Norway
-flow into Sweden and eventually empty into lake Vänern, which in turn is drained
-by the Göta Älv. No rivers that carry water originating from Norway extend any
+Älv drains into Kattegat at Gothenburg, since some rivers in eastern Norway flow
+into Sweden and eventually empty into lake Vänern, which in turn is drained by
+the Göta Älv. No rivers that carry water originating from Norway extend any
 further south than that.
 
 The grid is set to be the smallest grid that fulfills the criteria above, *and*
-that starts and ends on multiples of 0.125 degrees in both latitude and
-longitude.
+where the grid cell centers start and end on integer degrees in both latitude
+and longitude.
 
 These definitions produce the following limits for the grid:
-* **West**: 4.375 E (constrained by Steinsøyna in the Utvær archipelago, in Solund,
+* **West**: 4.0 E (constrained by Steinsøyna in the Utvær archipelago, in Solund,
   Vestland, which extends a few meters west of 4.5 E)
-* **East**: 31.25 E (constrained by the easternmost point of Hornøya in Vardø,
+* **East**: 32.0 E (constrained by the easternmost point of Hornøya in Vardø,
   Finnmark, at about 31.17 E)
-* **South**: 57.5 N (constrained by the mouth of the Göta Älv at Gothenburg,
-  Sweden. The mouth of the river itself is at around 57.68 N, but we extend this
-  a little further to allow for possible transport of sediment further south in
-  the archipelago outside of Gothenburg).
-* **North**: 71.25 N (constrained by the northernmost point of the minor island
+* **South**: 57.0 N (constrained by the mouth of the Göta Älv at Gothenburg,
+  Sweden. The mouth of the river itself is at around 57.68 N, and possibly a
+  little further south to allow for transport of sediment in the archipelago
+  outside of Gothenburg).
+* **North**: 72.0 N (constrained by the northernmost point of the minor island
   Avløysa at Kinnarodden on Magerøya, Finnmark, at around 71.13 N).
 
 These limits are taken to be constraints on the *centers* of the grid cells.
 I.e., the grid cells at the edges have center latitudes and/or longitudes equal
 to those listed above, while the grid corners on the edges have latitudes and/or
-longitudes 0.0625 degrees beyond those values.
+longitudes 0.05 degrees beyond those values.
 
 
 ## Create grid files and input data for CTSM
@@ -133,20 +142,18 @@ the dev environment, then replace the last command with `pixi shell -e dev`.
 
 Then go to the directory `/tools/mkmapgrids/` and call the following command:
 
-`PRINT=TRUE PTNAME="NorwayRect_0.125x0.125" W_LON=4.3125 E_LON=31.3125 S_LAT=57.4375 N_LAT=71.3125 NX=216 NY=111 ncl ./mkscripgrid.ncl`
+`PRINT=TRUE PTNAME="NorwayRect_0.1x0.1" W_LON=3.95 E_LON=32.05 S_LAT=56.95 N_LAT=72.05 NX=281 NY=151 ncl ./mkscripgrid.ncl`
 
 See `/tools/mkmapgrids/README` for an explanation of the environment variables
 that are set prior the `ncl` command.
 
 These commands will produce an output file named
-`SCRIPgrid_NorwayRect_0.125x0.125_nomask_cYYMMDD.nc` (with YYMMDD replaced by
+`SCRIPgrid_NorwayRect_0.1x0.1_nomask_cYYMMDD.nc` (with YYMMDD replaced by
 the current date) in the folder /tools/mkmapgrids/.
 
 **NB!** The commands above produce a SCRIP file without a land mask (or, more
 precisely, a land mask that is 1 for every grid cell) and no land fraction data.
-At the time of writing this (2025-10-27) it is not yet clear whether we need to
-add a land mask and/or land fraction, or whether this can be taken from the raw
-data files when generating the surface data set.
+See comments about this in the next section.
 
 On betzy, the SCRIP file was moved from `${CTSMROOT}/tools/mkmapgrids/` to
 `/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/`.
@@ -169,6 +176,7 @@ with the desired path and name of the output ESMF mesh file):
 
 ```
 module load [ESMF_module]
+
 ESMF_Scrip2Unstruct [scrip_file] [output_esmf_file] 0
 ```
 
@@ -183,7 +191,17 @@ On betzy, the following commands were used after changing to the directory
 
 ```
 module load ESMF/8.8.0-iomkl-2022a-ParallelIO-2.6.5
-ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.125x0.125_nomask_c251026.nc ../meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc 0
+
+ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260108.nc ../meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc 0
+```
+
+Note that if you get an error message about the ESMF module (or at least the
+specified version of it) being found on betzy, you may need to tell the module
+system to look for modules in the custom module library for noresm and then try
+again. On betzy, this was done with the following command:
+
+```
+module use /cluster/shared/noresm/eb_noresm3/modules/all/
 ```
 
 ### 3. Add new resolution and grid to config files
@@ -198,7 +216,7 @@ must be added to the entry `res`. Find the the XML `<entry>` tag that has the
 attribute `id="res"`, and add the new resolution name to the comma-separated
 list (without any added spaces) in the `valid_values=` attribute.
 
-On Betzy, the name `NorwayRect_0.125x0.125` was added. This will be used in the
+On Betzy, the name `NorwayRect_0.1x0.1` was added. This will be used in the
 remainder of this guide.
 
 #### Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files
@@ -208,10 +226,10 @@ from point 2 in the `<domains>` section. The following tag was added on betzy
 (after `<domains>` and before `</domains>`):
 
 ```
-  <domain name="NorwayRect_0.125x0.125">
-    <nx>217</nx>  <ny>112</ny>
-    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc</mesh>
-    <desc>0.125x0.125 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
+  <domain name="NorwayRect_0.1x0.1">
+    <nx>281</nx>  <ny>151</ny>
+    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc</mesh>
+    <desc>0.1x0.1 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
   </domain>
 ```
 
@@ -224,10 +242,10 @@ Then add aliases for the grid name in `/ccs_config/modelgrid_aliases_nuopc.xml`.
 The following was added on betzy:
 
 ```
-  <model_grid alias="NorwayRect0.125">
-    <grid name="atm">NorwayRect_0.125x0.125</grid>
-    <grid name="lnd">NorwayRect_0.125x0.125</grid>
-    <grid name="ocnice">NorwayRect_0.125x0.125</grid>
+  <model_grid alias="NorwayRect0.1">
+    <grid name="atm">NorwayRect_0.1x0.1</grid>
+    <grid name="lnd">NorwayRect_0.1x0.1</grid>
+    <grid name="ocnice">NorwayRect_0.1x0.1</grid>
     <mask>null</mask>
   </model_grid>
 ```
@@ -263,10 +281,10 @@ as described previously, the namelist used by `mksurfdata` can be generated with
 the following command (while in the directory `/tools/mksurfdata_esmf/`):
 
 ```
-./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.125x0.125 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
+./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.1x0.1 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
 ```
 
-Replace `NorwayRect_0.125x0.125` with the desired resolution name if using a
+Replace `NorwayRect_0.1x0.1` with the desired resolution name if using a
 different resolution or name, and the path after `--rawdata-dir` with the path
 to the root of the input data directory (`$DIN_LOC_ROOT`) if running on a
 different machine than betzy with a different input data path.
@@ -309,7 +327,7 @@ and setting the requested wall time in format `h:mm:ss`.
 
 In the run made by `korsbakken` on betzy, the surface data file itself was
 generated after less than 20 minutes, while processing data for the land use
-file took more than 4 minutes per year, and a total of 12.6 hours for the period
+file took more than 4 minutes per year, and a total of 12.7 hours for the period
 1850--2023.
 
 The job script included in the commit at the time of writing has the time
@@ -409,7 +427,7 @@ see below), and then manually change the affected paths in the following files:
 * The list of land use files (`landuse_timeseries_hist_*.txt`, where the `*`
   depends on the years and number of pfts).
 
-This problem did arise in the run on betzy in November 2025. This was "solved"
+This problem did arise in the run on betzy in January 2026. This was "solved"
 by creating a separate directory called `rawdata_norsink_tmp` under
 `/cluster/shared/noresm/inputdata/`, parallel to the main rawdata folder
 `/cluster/shared/noresm/inputdata/rawdata/`. If this folder is still there, it
@@ -433,12 +451,13 @@ particular, check the following:
    `time srun ...` and containing a path to `mksurfdata`). In the example job
    script used by `janko` in this branch, there are absolute paths to the
    location of the repo in the home folder of the user `janko` on these lines,
-   and they must be chaned to the absolute paths of `.env_mach_specific.sh`` and
+   and they must be changed to the absolute paths of `.env_mach_specific.sh`` and
    `mksurfdata` under the `mksurfdata_esmf` folder where you have your clone of
    the repo.
 2. **That the `SBATCH` parameters at the top of the job script are appropriate.**
 
-   The following parameters were used for the run on betzy in November 2025, for
+
+   The following parameters were used for the run on betzy in January 2006, for
    generating both a surface data and land use file:
    ```
    #!/bin/bash
@@ -452,9 +471,9 @@ particular, check the following:
    #SBATCH --cpus-per-task=1
    #SBATCH --mem=175G
    ```
-   The actual run took 12.6 hours of wall time in total. The surface data file
-   was generated after about 15 minutes of runtime, the remaining time was spent
-   generating the land use file.
+   The actual run took 12.7 hours of wall time in total. The surface data file
+   was generated after just over 15 minutes of runtime, the remaining time was
+   spent generating the land use file.
 
 Then submit the job with the command `sbatch ./jobscriptname.sh` (replace
 `./jobscriptname.sh` with the actual path to your jobscript file) and wait for
@@ -477,8 +496,8 @@ correct values.
 If the `mksurfdata` job finishes successfully, it will put a surface data file
 and a land use in the `/tools/mksurfdata_esmf` folder, with names of the form
 `surfdata_*_cYYMMDD.nc` and `landuse.timeseries_*_cYYMMDD.nc`, respectively. For
-the grid used in the November 2025 run, these should be roughly 800 MB and 7.3
-GB, respectively.
+the 0.1x0.1 degree grid used in the January 2026 run, these should be roughly
+1.4 GB and 13 GB, respectively.
 
 ### 7. Add land mask and grid cell areas to the mesh file
 
@@ -524,9 +543,9 @@ mask and grid cell areas and output a new mesh file with both added to the
 original:
 ```
 "${masktooldir}/surfdat_landfrac_to_mesh_mask.sh" \
-    --mesh-file ./ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc  \
+    --mesh-file ./ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc  \
     --surfdata-file "${surfdatafilepath}" \
-    --output-mesh-file ./ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc
+    --output-mesh-file ./ESMFmesh_NorwayRect_0.1x0.1_lndmask_c260108.nc
 ```
 Adjust the file name after `--mesh-file ./` to match the actual name of the
 preliminary mesh file you generated. If desired, also modify the file name after
@@ -542,8 +561,8 @@ required only for later convenience):
 
 Move the surface data and land use files generated above (and optionally also
 the log file) to the inputdata folder where you want to use them. There is no
-absolute requirement for where to place them, butthe data generated in November
-2025 in NorSink on betzy were moved to
+absolute requirement for where to place them, but the data generated in January
+2026 in NorSink on betzy were moved to
 `/cluster/shared/noresm/inputdata/cicero_mods/surfdata_esmf/ctsm5.3.0/`.
 
 In general on betzy, we use folders under `/cluster/shared/noresm/inputdata/`
@@ -558,16 +577,16 @@ areas, we need to adjust the preliminary grid and mesh file configurations we
 added to the XML databases in the previous steps.
 
 1. Change the mask in the grid alias definition: In
-   [`modelgrid_aliases_nuopc.xml](./ccs_config/modelgrid_aliases_nuopc.xml),
+   [`modelgrid_aliases_nuopc.xml`](./ccs_config/modelgrid_aliases_nuopc.xml),
    change `null` in `<mask>null</mask>` in the block you added previously to the
    name of the grid. For the grid that was described for betzy above, the
    `<model_grid>` block above then becomes:
    ```
-   <model_grid alias="NorwayRect0.125">
-     <grid name="atm">NorwayRect_0.125x0.125</grid>
-     <grid name="lnd">NorwayRect_0.125x0.125</grid>
-     <grid name="ocnice">NorwayRect_0.125x0.125</grid>
-     <mask>NorwayRect_0.125x0.125</mask>
+   <model_grid alias="NorwayRect0.1">
+     <grid name="atm">NorwayRect_0.1x0.1</grid>
+     <grid name="lnd">NorwayRect_0.1x0.1</grid>
+     <grid name="ocnice">NorwayRect_0.1x0.1</grid>
+     <mask>NorwayRect_0.1x0.1</mask>
    </model_grid>
    ```
    where the `<mask>` tag on the penultimate line has been changed.
@@ -578,10 +597,10 @@ added to the XML databases in the previous steps.
    that you generated with `surfdat_landfrac_to_mesh_mask.sh` above. With the
    settings above, the domain block for the grid then becomes:
    ```
-   <domain name="NorwayRect_0.125x0.125">
-     <nx>217</nx>  <ny>112</ny>
-     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_lndmask_c251031.nc</mesh>
-     <desc>0.125x0.125 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
+   <domain name="NorwayRect_0.1x0.1">
+     <nx>281</nx>  <ny>151</ny>
+     <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_lndmask_c260108.nc</mesh>
+     <desc>0.1x0.1 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
    </domain>
    ```
    where the `<mesh>` tag in the third line was changed.
@@ -594,18 +613,18 @@ In order to use the new grid and the new input data files in scripts such as
 specify them manually when creating a case):
 
 1. Add the path to the surface data file in an `<fsurdat>` field, with appropriate options for `sim_year` and `use_crop`.
-   For the `NorwayRect_0.125x0.125` grid and files created in November 2025 on betzy, the following lines were added:
+   For the `NorwayRect_0.1x0.1` grid and files created in January 2026 on betzy, the following lines were added:
    ```
-   <fsurdat hgrid="NorwayRect_0.125x0.125" sim_year="1850" use_crop=".true." >
-   cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.nc</fsurdat>
+   <fsurdat hgrid="NorwayRect_0.1x0.1" sim_year="1850" use_crop=".true." >
+   cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260108.nc</fsurdat>
    ```
 
 2. Add the path to the land use file in an `<flanduse>` field. For the
-   `NorwayRect_0.125x0.125` grid and files created in November 2025 on betzy,
-   the following lines were added:
+   `NorwayRect_0.1x0.1` grid and files created in January 2026 on betzy, the
+   following lines were added:
    ```
-   <flanduse_timeseries hgrid="NorwayRect_0.125x0.125" sim_year_range="1850-2023">
-   cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.125x0.125_hist_1850-2023_78pfts_c251102.nc</flanduse_timeseries>
+   <flanduse_timeseries hgrid="NorwayRect_0.1x0.1" sim_year_range="1850-2023">
+   cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.1x0.1_hist_1850-2023_78pfts_c260108.nc</flanduse_timeseries>
    ```
 
 
@@ -640,7 +659,7 @@ the new grid, the river model on the `r05` grid, and other model on a `null`
 grid (being stubs). The overall mask is set to that of the new grid.
 
 Go to the directory where you want to create the new case directory as a
-subdirectory and give the following command (replace `NorwayRect_0.125x0.125`
+subdirectory and give the following command (replace `NorwayRect_0.1x0.1`
 with the name of your new grid if you chose a different name, and
 `test_NorwayRect_simple_case` with a different case name if desired):
 
@@ -648,7 +667,7 @@ with the name of your new grid if you chose a different name, and
 create_newcase \
   --case test_NorwayRect_simple_case \
   --compset '1850_DATM%CRUJRA2024_CLM50%BGC_SICE_SOCN_MOSART_SGLC_SWAV' \
-  --res 'a%NorwayRect_0.125x0.125_l%NorwayRect_0.125x0.125_r%r05_g%null_oi%null_w%null_z%null_m%NorwayRect_0.125x0.125' \
+  --res 'a%NorwayRect_0.1x0.1_l%NorwayRect_0.1x0.1_r%r05_g%null_oi%null_w%null_z%null_m%NorwayRect_0.1x0.1' \
   --machine betzy \
   --project nn9188k \
   --run-unsupported \

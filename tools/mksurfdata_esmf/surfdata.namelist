@@ -1,7 +1,7 @@
 &mksurfdata_input 
-  mksrf_fgrid_mesh = '/cluster/shared/noresm/inputdata/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.125x0.125_nomask_c251031.nc' 
-  mksrf_fgrid_mesh_nx = 216 
-  mksrf_fgrid_mesh_ny = 111 
+  mksrf_fgrid_mesh = '/cluster/shared/noresm/inputdata/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc' 
+  mksrf_fgrid_mesh_nx = 281 
+  mksrf_fgrid_mesh_ny = 151 
   mksrf_flai = '/cluster/shared/noresm/inputdata/lnd/clm2/rawdata_norsink_tmp/CTSM53RawData/globalctsm53histMKSRFDeg025_240709/mksrf_landuse_ctsm53_pftlai_CLIM.c240709.nc' 
   mksrf_flai_mesh = '/cluster/shared/noresm/inputdata/lnd/clm2/mappingdata/grids/UNSTRUCTgrid_0.25x0.25_nomask_cdf5_c200129.nc' 
   mksrf_fsoicol = '/cluster/shared/noresm/inputdata/lnd/clm2/rawdata_norsink_tmp/CTSM53RawData/globalctsm53histMKSRFDeg025_240709/mksrf_landuse_ctsm53_soilcolor_CLIM.c240709.nc' 
@@ -44,9 +44,9 @@
   mksrf_fpctlak = '/cluster/shared/noresm/inputdata/lnd/clm2/rawdata_norsink_tmp/lake_area/mksurf_lake_0.05x0.05_hist_clm5_hydrolakes_1850.cdf5.c20220325.nc' 
   mksrf_furban = '/cluster/shared/noresm/inputdata/lnd/clm2/rawdata_norsink_tmp/gao_oneill_urban/historical/urban_properties_GaoOneil_05deg_ThreeClass_1850_cdf5_c20220910.nc' 
   mksrf_fdynuse = 'landuse_timeseries_hist_1850-2023_78pfts.txt ' 
-  fsurdat = 'surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.nc'
-  fsurlog = 'surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.log' 
-  fdyndat = 'landuse.timeseries_NorwayRect_0.125x0.125_hist_1850-2023_78pfts_c251102.nc' 
+  fsurdat = 'surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260108.nc'
+  fsurlog = 'surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260108.log' 
+  fdyndat = 'landuse.timeseries_NorwayRect_0.1x0.1_hist_1850-2023_78pfts_c260108.nc' 
   numpft = 78 
   no_inlandwet = .false. 
   outnc_3dglc = .false. 
@@ -54,5 +54,5 @@
   outnc_double = .true. 
   logname = 'janko' 
   hostname = 'betzy' 
-  gitdescribe = 'ctsm5.3.045_noresm_v0-49-g21f48a71c' 
+  gitdescribe = 'ctsm5.3.045_noresm_v0-120-gb4764cd78' 
 / 

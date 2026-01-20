@@ -1667,6 +1667,10 @@ cicero_mods/lnd/clm2/surfdata_esmf/ctsm5.3.0/surfdata_0.05x0.1_hist_2005_78pfts_
 <fsurdat hgrid="NorwayRect_0.125x0.125" sim_year="1850" use_crop=".true." >
 cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.nc</fsurdat>
 <!-- END JIK 2025-11-23 -->
+<!-- JIK 2026-01-09: Added surface data file for the ERA5-Land-compatible rectangular 0.1-degree grid that contains the Norwegian mainland -->
+<fsurdat hgrid="NorwayRect_0.1x0.1" sim_year="1850" use_crop=".true." >
+cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260108.nc</fsurdat>
+<!-- END JIK 2026-01-08 -->
 <fsurdat hgrid="ne30np4"     sim_year="2000" >
 lnd/clm2/surfdata_esmf/ctsm5.3.0/surfdata_ne30np4_hist_2000_78pfts_c240908.nc</fsurdat>
 <fsurdat hgrid="ne30np4.pg2" sim_year="2000" >
@@ -1850,6 +1854,10 @@ lnd/clm2/surfdata_map/release-clm5.0.18/surfdata_cic0.5res_hist_78pfts_CMIP6_sim
 <flanduse_timeseries hgrid="NorwayRect_0.125x0.125" sim_year_range="1850-2023"
 >cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.125x0.125_hist_1850-2023_78pfts_c251102.nc</flanduse_timeseries>
 <!-- END JIK 2025-11-23 -->
+<!-- JIK 2026-01-08: Added landuse file for 1850-2023 for ERA5-Land-compatible rectangular 0.1-degree Norway grid, generated using the standard CTSM raw inputdata set -->
+<flanduse_timeseries hgrid="NorwayRect_0.1x0.1" sim_year_range="1850-2023">
+cicero_mods/surfdata_esmf/ctsm5.3.0/landuse.timeseries_NorwayRect_0.1x0.1_hist_1850-2023_78pfts_c260108.nc</flanduse_timeseries>
+<!-- END JIK 2026-01-08 -->
 
 
 <!-- Note that these transient files only go up to year 1855.
