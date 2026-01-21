@@ -837,7 +837,7 @@ package [`era5land_to_datm`](https://github.com/ciceroOslo/era5land_to_datm).*
 
 *On Betzy, the converted data for the 0.1-degree grid covering Norway for
 NorSink is stored in
-`/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND.0.1d.NorwayRect.c260120`
+`/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260120`
 (each stream in a separate subfolder, `Precip1Hrly`, `Solar1Hrly`, and
 `TPQWL1Hrly`)*
 
