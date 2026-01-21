@@ -45,6 +45,7 @@ and input data for CLM/CTSM and accompanying models used in the project.
   - [4. Create and run a test case with the new forcing data](#4-create-and-run-a-test-case-with-the-new-forcing-data)
     - [a. Create the case](#a-create-the-case)
     - [b. Set XML options](#b-set-xml-options)
+    - [c. Build and submit](#c-build-and-submit)
 
 
 ## Definition of the grid
@@ -921,9 +922,33 @@ create_newcase \
   --machine betzy \
   --project nn9188k \
   --run-unsupported \
-  --walltime '0:60:00'
+  --walltime '0:45:00'
 ```
 
 #### b. Set XML options
 
 In the case directory created in the previous step:
+```
+./xmlchange CLM_FORCE_COLDSTART=on
+
+./xmlchange STOP_OPTION=nmonths
+./xmlchange STOP_N=3
+
+./xmlchange HIST_OPTION=nmonths
+./xmlchange HIST_N=1
+
+./xmlchange RUN_STARTDATE=2019-01-01
+./xmlchange DATM_YR_START=2019
+./xmlchange DATM_YR_ALIGN=2019
+./xmlchange DATM_YR_END=2019
+```
+
+#### c. Build and submit
+
+In the case directory, after inspecting files and checking that things look
+right:
+```
+./case.setup --verbose
+./case.build --verbose --debug
+./case.submit --verbose --debug
+```
