@@ -865,12 +865,19 @@ In `/components/cdeps/datm/cime_config/config_component.xml`, add a mode
 with compset identifier `ERA5LAND-NORWAYRECT` and mode name
 `ERA5LAND_NORWAYRECT` and suitable description and settings for it under:
 * `<description modifier_mode="1">` (the compset identifier)
-* `<entry id="DATM_MODE">` (mapping compset identifier to mode name)
+* `<entry id="DATM_MODE">` (both as a valid value and in list of `<value>`
+  fields, mapping compset identifier to mode name)
 * `<entry id="DATM_YR_ALIGN">` (optional, but will probably need to be set
   manually with `xmlchange` if not set. Requires specifying a compset pattern
   match, which will include the compset identifier)
 * `<entry id="DATM_YR_START">`
 * `<entry id="DATM_YR_END">`
+
+In `/cime_config/config_component.xml` (the CTSM component config file), add
+tuning modes for the forcing data under `<entry id="LND_TUNING_MODE">`. We don't
+have separate tuning for the ERA5 Land data, but assume we can use the tuning
+for ERA5 data in general, i.e., set the tuning mode as `clmN_N_ERA5`, replacing
+`N_N` with the relevant CLM versions (4.5, 5.0, 6.0).
 
 #### b. Add streams for the mode in the namelist definition XML file
 
