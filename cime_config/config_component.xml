@@ -114,7 +114,7 @@
       <value compset="DATM%1PT_CLM50"    >clm5_0_1PT</value>
       <value compset="DATM%NLDAS2_CLM50" >clm5_0_NLDAS2</value>
       <value compset="DATM%ERA5_CLM50"   >clm5_0_ERA5</value>
-      <value compset="DATM%ERA5LAND-NORWAYRECT_CLM50">clm5_0_CRUJRA2024</value>
+      <value compset="DATM%CLMERA5LAND-NORWAYRECT_CLM50">clm5_0_CRUJRA2024</value>
       <!-- All the clm6_0 physics options -->
       <value compset="DATM%CRUJRA2024_CLM60">clm6_0_CRUJRA2024</value>
       <value compset="DATM%CRUJRA3v0_CLM60">clm6_0_CRUJRA3v0</value>
@@ -132,7 +132,7 @@
       <value compset="DATM%1PT_CLM60"    >clm6_0_1PT</value>
       <value compset="DATM%NLDAS2_CLM60" >clm6_0_NLDAS2</value>
       <value compset="DATM%ERA5_CLM60"   >clm6_0_ERA5</value>
-      <value compset="DATM%ERA5LAND-NORWAYRECT_CLM60">clm6_0_CRUJRA2024</value>
+      <value compset="DATM%CLMERA5LAND-NORWAYRECT_CLM60">clm6_0_CRUJRA2024</value>
       <!-- Invalid ocean DATM forcing options -->
       <value compset="DATM%NYF"          >INVALID_DATM_FORCING_FOR_RUNNING_CTSM</value>
       <value compset="DATM%MOSARTTEST"   >INVALID_DATM_FORCING_FOR_RUNNING_CTSM</value>
