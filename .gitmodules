@@ -67,9 +67,9 @@ fxDONOTUSEurl = https://github.com/ESCOMP/mizuRoute
 
 [submodule "ccs_config"]
 path = ccs_config
-url = git@github.com:korsbakken/ccs_config_noresm.git
+url = https://github.com/korsbakken/ccs_config_noresm
 branch = norsink_inputdata_main
-# fxtag = ccs_config_noresm0.0.49
+fxtag = norsink_inputdata_main-merge-noresm_b8a2e75
 fxrequired = ToplevelRequired
 # Standard Fork to compare to with "git fleximod test" to ensure personal forks aren't committed
 fxDONOTUSEurl = https://github.com/NorESMhub/ccs_config_noresm
