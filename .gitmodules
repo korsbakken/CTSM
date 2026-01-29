@@ -93,9 +93,8 @@ fxDONOTUSEurl = https://github.com/NorESMhub/CMEPS.git
 [submodule "cdeps"]
 path = components/cdeps
 # url = https://github.com/NorESMhub/CDEPS.git
-url = git@github.com:korsbakken/CDEPS.git
-branch = icos3
-# fxtag = cdeps1.0.70_noresm_v7
+url = https://github.com/korsbakken/CDEPS.git
+fxtag = norsink_inputdata_main-merge-noresm_da0629c
 fxrequired = ToplevelRequired
 # Standard Fork to compare to with "git fleximod test" to ensure personal forks aren't committed
 fxDONOTUSEurl = https://github.com/NorESMhub/CDEPS.git
