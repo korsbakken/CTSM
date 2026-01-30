@@ -691,7 +691,7 @@ contains
          ! atmospheric longwave radiation to road and walls is conserved as
          ! lwdown (from atmosphere) = lwdown_improad + lwdown_perroad + (lwdown_sunwall + lwdown_shadewall)*canyon_hwr
 
-         err = lwdown(1) + lwnet_canyon(1) - lwup_canyon(1)
+         err = lwnet_canyon(l) - (lwup_canyon(l) - lwdown(l))
          if (abs(err) > .10_r8 ) then
             write (iulog,*) 'urban net longwave radiation balance error',err,' (lwdown ',lwdown(1),', lwup_canyon ',lwup_canyon(1),', lwnet_canyon ',lwnet_canyon(1),')'
             write (iulog,*) 'clm model is stopping'
