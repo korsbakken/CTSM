@@ -693,7 +693,7 @@ contains
 
          err = lwnet_canyon(l) - (lwup_canyon(l) - lwdown(l))
          if (abs(err) > .10_r8 ) then
-            write (iulog,*) 'urban net longwave radiation balance error',err,' (lwdown ',lwdown(1),', lwup_canyon ',lwup_canyon(1),', lwnet_canyon ',lwnet_canyon(1),')'
+            write (iulog,*) 'urban net longwave radiation balance error',err,' (lwdown ',lwdown(l),', lwup_canyon ',lwup_canyon(l),', lwnet_canyon ',lwnet_canyon(l),')'
             write (iulog,*) 'clm model is stopping'
             call endrun(subgrid_index=l, subgrid_level=subgrid_level_landunit, msg=errmsg(sourcefile, __LINE__))
          end if
