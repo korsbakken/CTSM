@@ -9,6 +9,8 @@ area field with grid cell areas in steradians. It will have a trivial mask field
 (all unmasked / 1 for all grid cells).
 """
 from collections.abc import Sequence
+from pathlib import Path
+
 import esmpy
 import netCDF4 as nc4
 import numpy as np
@@ -272,25 +274,27 @@ def write_mesh_to_netcdf(
     print(f"Successfully generated ESMF Mesh file: {filename}")
 
 
-def generate_esmf_rect_mesh_file(
+def generate_esmf_rect_mesh(
     lon_centers: NDArrayFloat1d,
     lat_centers: NDArrayFloat1d,
-    output_filename: str = 'esmf_mesh.nc'
-) -> None:
+) -> esmpy.Mesh:
     """
-    Orchestration function to generate a regular rectangular ESMF Mesh file.
+    Orchestration function to generate a regular rectangular ESMF Mesh object.
     
     This function accepts grid cell CENTERS, computes the corresponding
-    NODES (corners), and generates the mesh.
+    NODES (corners), and generates the mesh object.
 
     Parameters
     ----------
-    lon_centers : NDArrayFloat
+    lon_centers : numpy.ndarray
         1D array of longitude coordinates (cell centers).
-    lat_centers : NDArrayFloat
+    lat_centers : numpy.ndarray
         1D array of latitude coordinates (cell centers).
-    output_filename : str
-        Path to the output NetCDF file.
+
+    Returns
+    -------
+    esmpy.Mesh
+        The constructed ESMF Mesh object, with area field and trivial mask.
     """
     # 1. Prepare Coordinates
     print('Calculating node coordinates from centers...')
@@ -322,10 +326,6 @@ def generate_esmf_rect_mesh_file(
 
     # 5. Create Trivial Mask (All 1s)
     mask_values = np.ones(n_elems, dtype=np.int32)
-
-    # 6. Write to Disk
-    print(f'Writing to {output_filename}...')
-    write_mesh_to_netcdf(mesh, output_filename, area_values, mask_values)
 
 
 # Example Usage Block
