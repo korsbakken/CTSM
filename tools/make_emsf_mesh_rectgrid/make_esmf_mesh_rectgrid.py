@@ -327,6 +327,10 @@ def generate_esmf_rect_mesh(
     # 5. Create Trivial Mask (All 1s)
     mask_values = np.ones(n_elems, dtype=np.int32)
 
+    # Add the area and mask values
+    mesh.area[1] = area_values
+    mesh.mask[1] = mask_values
+
 
 # Example Usage Block
 if __name__ == '__main__':
