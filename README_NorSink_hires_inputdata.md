@@ -244,12 +244,10 @@ On betzy, the SCRIP file was moved from `${CTSMROOT}/tools/mkmapgrids/` to
 ### 2. Create a (preliminary) mesh file with triival mask
 
 The SCRIP grid file from the previous file is used to produce a mesh file with a
-trivial mask (1 everywhere), and without a field for the grid cell areas (since
-the SCRIP file from the previous step does not contain one). We need a mesh file
-to create the surface data set, but the surface data contains its own land
-fraction data and does not need a mask. We will then later use the surface data
-set to add a land mask to the mesh file, and at the same time compute and add
-grid cell areas.
+trivial mask (1 everywhere). We need a mesh file to create the surface data set,
+but the surface data contains its own land fraction data and does not need a
+mask. We will then later use the surface data set to add a land mask to the mesh
+file.
 
 The preliminary mesh file is produced with the following commands, where
 `[ESMF_module]` is replaced with a suitable module that enables the
@@ -275,7 +273,7 @@ On betzy, the following commands were used after changing to the directory
 ```
 module load ESMF/8.8.0-iomkl-2022a-ParallelIO-2.6.5
 
-ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260108.nc ../meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc 0
+ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260203.nc ../meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260203.nc 0
 ```
 
 Note that if you get an error message about the ESMF module (or at least the
