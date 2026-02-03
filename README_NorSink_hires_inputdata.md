@@ -309,7 +309,7 @@ from point 2 in the `<domains>` section. The following tag was added on betzy
 ```
   <domain name="NorwayRect_0.1x0.1">
     <nx>281</nx>  <ny>151</ny>
-    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc</mesh>
+    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260203.nc</mesh>
     <desc>0.1x0.1 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
   </domain>
 ```
