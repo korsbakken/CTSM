@@ -9,6 +9,7 @@ and input data for CLM/CTSM and accompanying models used in the project.
 - [Create the Python enironment](#create-the-python-enironment)
 - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
   - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+    - [1.a Legacy method using `/tools/mkmapgrids/mkscripgrid.ncl`](#1a-legacy-method-using-toolsmkmapgridsmkscripgridncl)
   - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
   - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
     - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
@@ -156,6 +157,67 @@ The current workflow appears to be:
    the river transport model].
 
 ### 1. Create the SCRIP grid file
+
+There are many ways to create a SCRIP file for a rectangular grid. The simplest
+approach, which also adds grid cell areas to the SCRIP file (not done in many
+other methods), is to use the `ncks --rgr` command in
+[NCO](https://nco.sourceforge.net). You need at least version 4.5.2. A legacy
+method using `/tools/mkmapgrids/mkscripgrid.ncl` in the CTSM repo is outlined
+below, but it does not give you grid cell areas, and we recommend using `ncks`
+instead.
+
+We follow the approach documented in the section "[Grid
+Generation](https://nco.sourceforge.net/nco.html#Grid-Generation)" of the [NCO User Guide](https://nco.sourceforge.net/nco.html)
+
+On betzy, you can use NCO by loading the NCO module:
+```
+module load NCO/5.1.9-foss-2023b-ESMF-8.8.0
+```
+(other versions of the same module may also work, as long as it's higher than
+4.5.2)
+
+The command below outputs a file named
+`SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260108.nc` for the rectangular grid
+covering Norway listed above. Adjust the name given in the `scrip=` option in
+the command below if desired. If you change the coordinates, the coordinates in
+the options `lat_sth` and `lon_wst` should be half a grid cell width west/south
+of the grid cell centers at the western/southern edge, and the coordinates in
+`lat_nrt` and `lat_est` correspondingly half a grid cell width north/east of the
+northern/western edges (i.e., they are grid cell edge coordinates, not the
+coordinates of the centers). `lat_nbr` and `lon_nbr` must be set to the number
+of grid cells (the number of centers) in the latitude and longitude direction
+(which determines the resolution). This will be given by
+$$$
+lat_nbr = \frac{lat_nrt - lat_sth}{resolution}
+$$$
+and similarly for `lon_nbr`, `lon_wst` and `lon_est`.
+
+The second-to-last command line argument is a dummy input netCDF file. It can be
+any netCDF file, the content will be ignored, but it is required for the `ncks`
+function to run. The final argument is similarly a dummy output file that will
+be created (and should not already exist), but will not have any meaningful
+content.
+```
+ncks \
+    --rgr grd_ttl="Rectangular 0.1x0.1 degree grid that covers Norway and outflowing rivers" \
+    --rgr scrip=SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260203.nc \
+    --rgr lat_typ=uni \
+    --rgr lon_typ=grn_ctr \
+    --rgr lat_nbr=151 \
+    --rgr lon_nbr=281 \
+    --rgr lat_drc=s2n \
+    --rgr lat_sth=56.95 \
+    --rgr lat_nrt=72.05 \
+    --rgr lon_wst=3.95 \
+    --rgr lon_est=32.05 \
+    dummy_in.nc dummy_out.nc
+```
+
+On betzy for NorSink, the SCRIP file was moved to the folder
+`/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/` after having
+been created.
+
+#### 1.a Legacy method using `/tools/mkmapgrids/mkscripgrid.ncl`
 
 Creating the SCRIP grid file only requires the `ncl` package in the Python
 environment and its dependencies. But if you also want to use the packages in
