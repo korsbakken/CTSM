@@ -371,7 +371,7 @@ as described previously, the namelist used by `mksurfdata` can be generated with
 the following command (while in the directory `/tools/mksurfdata_esmf/`):
 
 ```
-./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.1x0.1 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
+./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.1x0.1 --rawdata-dir /cluster/shared/noresm/inputdata
 ```
 
 Replace `NorwayRect_0.1x0.1` with the desired resolution name if using a
