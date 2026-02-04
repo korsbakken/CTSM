@@ -15,6 +15,7 @@
 . /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/.env_mach_specific.sh
 if [ $? != 0 ]; then echo "Error running env_mach_specific script"; exit -4; fi 
 # Edit the mpirun command to use the MPI executable on your system and the arguments it requires 
-time srun --kill-on-bad-exit --label  /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/mksurfdata < surfdata.namelist 
+# time srun --kill-on-bad-exit --label  /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/mksurfdata < surfdata.namelist 
+time srun --kill-on-bad-exit --label  /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/mksurfdata < surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260204.namelist
 if [ $? != 0 ]; then echo "Error running for namelist  surfdata.namelist"; exit -4; fi 
 echo Successfully ran resolution
