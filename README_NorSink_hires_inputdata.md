@@ -379,6 +379,15 @@ different resolution or name, and the path after `--rawdata-dir` with the path
 to the root of the input data directory (`$DIN_LOC_ROOT`) if running on a
 different machine than betzy with a different input data path.
 
+**NB!** The command above produces a surface data set *with* detailed crop PFTs
+("78pfts") and *without* inland wetlands. In the first version of the surface
+data set generated in October/November 2025 and again in January 2026, both
+crops and inland wetlands were included. In February 2026, a new surface data
+set was generated, with the only difference being that the option for inland
+wetlands was set to false. To *include* inland wetlands, add the flag
+`--inlandwet` to the  `gen_mksurfdata_namelist` command. To *disable* detailed
+crop representation (generate a "16pfts" file), add the flag `--nocrop`.
+
 The command will output a file called `surfdata.namelist` in current directory.
 
 In the output `surfdata.namelist`, check the name after `hostname` and correct
