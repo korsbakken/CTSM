@@ -1859,7 +1859,7 @@ cicero_mods/lnd/clm2/surfdata_esmf/ctsm5.3.0/surfdata_0.05x0.1_hist_2005_78pfts_
 cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.125x0.125_hist_1850_78pfts_c251102.nc</fsurdat>
 <!-- END JIK 2025-11-23 -->
 <!-- JIK 2026-01-09: Added surface data file for the ERA5-Land-compatible rectangular 0.1-degree grid that contains the Norwegian mainland -->
-<fsurdat hgrid="NorwayRect_0.1x0.1" sim_year="1850" use_crop=".true." >
+<fsurdat hgrid="NorwayRect_0.1x0.1" sim_year="1850" >
 cicero_mods/surfdata_esmf/ctsm5.3.0/surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260108.nc</fsurdat>
 <!-- END JIK 2026-01-08 -->
 <fsurdat hgrid="ne30np4"     sim_year="2000" >
