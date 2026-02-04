@@ -53,6 +53,6 @@
   outnc_large_files = .false. 
   outnc_double = .true. 
   logname = 'janko' 
-  hostname = 'login-1' 
+  hostname = 'betzy' 
   gitdescribe = 'alpha-ctsm5.4.CMIP7.15.ctsm5.3.082-797-g522ba45a3' 
 / 
