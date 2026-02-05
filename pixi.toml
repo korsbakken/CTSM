@@ -42,4 +42,4 @@ ipykernel = ">=7.1.0"
 dev = ["dev"]
 
 [activation.env]
-PATH = "$PWD/cime/scripts:$PATH"
+PATH = "$PIXI_PROJECT_ROOT/cime/scripts:$PATH"
