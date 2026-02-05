@@ -1,13 +1,12 @@
 #!/bin/bash
 #SBATCH --account=nn9188k
 #SBATCH --job-name=mksurfdata_esmf
-#SBATCH --qos=preproc
-#SBATCH --partition=preproc
+#SBATCH --qos=devel
+#SBATCH --partition=normal
 #SBATCH --time=0:45:00
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=128
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=175G
 
 # This is a batch script to run a set of resolutions for mksurfdata_esmf input namelist
 
@@ -16,6 +15,6 @@
 if [ $? != 0 ]; then echo "Error running env_mach_specific script"; exit -4; fi 
 # Edit the mpirun command to use the MPI executable on your system and the arguments it requires 
 # time srun --kill-on-bad-exit --label  /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/mksurfdata < surfdata.namelist 
-time srun --kill-on-bad-exit --label  /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/mksurfdata < surfdata_NorwayRect_0.1x0.1_hist_1850_78pfts_c260205.namelist
+time srun --kill-on-bad-exit --label  /cluster/home/janko/src/CESM_repos/CTSM/tools/mksurfdata_esmf/tool_bld/mksurfdata < surfdata_NorwayRect_0.1x0.1_hist_1850_16pfts_c260205.namelist
 if [ $? != 0 ]; then echo "Error running for namelist  surfdata.namelist"; exit -4; fi 
 echo Successfully ran resolution
