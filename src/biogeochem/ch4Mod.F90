@@ -4170,6 +4170,12 @@ contains
             errch4(c) = errch4(c) + (conc_ch4(c,j) - conc_ch4_bef(c,j))*dz(c,j)
             errch4(c) = errch4(c) - ch4_prod_depth(c,j)*dz(c,j)*dtime
             errch4(c) = errch4(c) + ch4_oxid_depth(c,j)*dz(c,j)*dtime
+            if (abs(errch4(c)) > 1.e-8_r8) then
+               write(iulog,*)'errch4 > 1.e-8 after soil level ch4 balance check at nstep, c, fc, j = ',nstep,c,fc,j
+               write(iulog,*)'errch4(c) = ',errch4(c)
+               write(iulog,*)'ch4_prod_depth(c,j), ch4_oxid_depth(c,j) = ',ch4_prod_depth(c,j),ch4_oxid_depth(c,j)
+               write(iulog,*)'conc_ch4(c,j), conc_ch4_bef(c,j) = ',conc_ch4(c,j),conc_ch4_bef(c,j)
+               write(iulog,*)'dz(c,j), dtime = ',dz(c,j),dtime
          end do
       end do
 
@@ -4186,6 +4192,8 @@ contains
          else ! errch4 > 1e-8 mol / m^2 / timestep
             write(iulog,*)'CH4 Conservation Error in CH4Mod during diffusion, nstep, c, errch4 (mol /m^2.timestep)', &
                  nstep,c,errch4(c)
+            write(iulog,*)'ch4_surf_aere(c), ch4_surf_ebul(c), ch4_surf_diff(c), dtime = ', &
+                  ch4_surf_aere(c),ch4_surf_ebul(c),ch4_surf_diff(c),dtime
             g = col%gridcell(c)
             write(iulog,*)'Latdeg,Londeg=',grc%latdeg(g),grc%londeg(g)
             call endrun(subgrid_index=c, subgrid_level=subgrid_level_column, &
