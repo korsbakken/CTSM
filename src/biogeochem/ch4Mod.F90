@@ -4176,6 +4176,7 @@ contains
                write(iulog,*)'ch4_prod_depth(c,j), ch4_oxid_depth(c,j) = ',ch4_prod_depth(c,j),ch4_oxid_depth(c,j)
                write(iulog,*)'conc_ch4(c,j), conc_ch4_bef(c,j) = ',conc_ch4(c,j),conc_ch4_bef(c,j)
                write(iulog,*)'dz(c,j), dtime = ',dz(c,j),dtime
+            end if
          end do
       end do
 
