@@ -804,6 +804,9 @@ contains
 !KO
                       write(iulog,*) 'problem with limitations on nh4 uptake', &
                                   sminn_to_plant_fun_nh4_vr(c,j),smin_nh4_to_plant_vr(c,j)
+                      write(iulog,*) '    at fc, c, j = ',fc,c,j
+                      write(iulog,*) 'soilbiogeochem_nitrogenflux_inst: ',soilbiogeochem_nitrogenflux_inst
+                      write(iulog,*) 'soilbiogeochem_nitrogenstate_inst: ',soilbiogeochem_nitrogenstate_inst
                       call endrun("too much NH4 uptake predicted by FUN")
                   end if
                end do
