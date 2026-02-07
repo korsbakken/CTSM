@@ -3445,6 +3445,10 @@ contains
     ! for keeping concentrations always above zero
     real(r8) :: conc_ch4_bef(bounds%begc:bounds%endc,1:nlevsoi)            ! concentration at the beginning of the timestep
     real(r8) :: errch4(bounds%begc:bounds%endc)                            ! Error (Mol CH4 /m^2) [+ = too much CH4]
+    real(r8) :: errch4_soil_check(bounds%begc:bounds%endc)                 ! Added for debug. Remember the part of errch4 that is generated from summing over soil layers.
+    real(r8) :: conc_ch4_check(bounds%begc:bounds%endc)                    ! Added for debug. Keep track of total CH4 concentration in soil
+    real(r8) :: ch4_prod_check(bounds%begc:bounds%endc)                    ! Added for debug. Keep track of CH4 production per column
+    real(r8) :: ch4_oxid_check(bounds%begc:bounds%endc)                    ! Added for debug. Keep track of soil CH4 oxidation  per column
     real(r8) :: conc_ch4_rel(bounds%begc:bounds%endc,0:nlevsoi)            ! Concentration per volume of air or water
     real(r8) :: conc_o2_rel(bounds%begc:bounds%endc,0:nlevsoi)             ! Concentration per volume of air or water
     real(r8) :: conc_ch4_rel_old(bounds%begc:bounds%endc,0:nlevsoi)        ! Concentration during last Crank-Nich. loop
@@ -4166,17 +4170,21 @@ contains
          do fc = 1, num_methc
             c = filter_methc (fc)
 
-            if (j == 1) errch4(c) = 0._r8
+            if (j == 1) then
+               errch4(c) = 0._r8
+               conc_ch4_check(c) = 0._r8
+               ch4_prod_check(c) = 0._r8
+               ch4_oxid_check(c) = 0._r8
+               errch4_soil_check(c) = 0._r8
+            end if
             errch4(c) = errch4(c) + (conc_ch4(c,j) - conc_ch4_bef(c,j))*dz(c,j)
             errch4(c) = errch4(c) - ch4_prod_depth(c,j)*dz(c,j)*dtime
             errch4(c) = errch4(c) + ch4_oxid_depth(c,j)*dz(c,j)*dtime
-            if (abs(errch4(c)) > 1.e-8_r8) then
-               write(iulog,*)'errch4 > 1.e-8 after soil level ch4 balance check at nstep, c, fc, j = ',nstep,c,fc,j
-               write(iulog,*)'errch4(c) = ',errch4(c)
-               write(iulog,*)'ch4_prod_depth(c,j), ch4_oxid_depth(c,j) = ',ch4_prod_depth(c,j),ch4_oxid_depth(c,j)
-               write(iulog,*)'conc_ch4(c,j), conc_ch4_bef(c,j) = ',conc_ch4(c,j),conc_ch4_bef(c,j)
-               write(iulog,*)'dz(c,j), dtime = ',dz(c,j),dtime
-            end if
+            ! DEBUG: Add up total CH4 concentration, production and oxidation across soil layers, to show in case of error.
+            errch4_soil_check(c) = errch4(c)
+            conc_ch4_check(c) = conc_ch4_check(c) + (conc_ch4(c,j) - conc_ch4_bef(c,j))*dz(c,j)
+            ch4_prod_check(c) = ch4_prod_check(c) - ch4_prod_depth(c,j)*dz(c,j)*dtime
+            ch4_oxid_check(c) = ch4_oxid_check(c) + ch4_oxid_depth(c,j)*dz(c,j)*dtime
          end do
       end do
 
@@ -4193,6 +4201,9 @@ contains
          else ! errch4 > 1e-8 mol / m^2 / timestep
             write(iulog,*)'CH4 Conservation Error in CH4Mod during diffusion, nstep, c, errch4 (mol /m^2.timestep)', &
                  nstep,c,errch4(c)
+            write(iulog,*)'errch4 from soil layers: ',errch4_soil_check(c)
+            write(iulog,*)'conc_ch4_check, ch4_prod_check, ch4_oxid_check = ', &
+                  conc_ch4_check(c),ch4_prod_check(c),ch4_oxid_check(c)
             write(iulog,*)'ch4_surf_aere(c), ch4_surf_ebul(c), ch4_surf_diff(c), dtime = ', &
                   ch4_surf_aere(c),ch4_surf_ebul(c),ch4_surf_diff(c),dtime
             g = col%gridcell(c)
