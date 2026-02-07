@@ -1749,6 +1749,7 @@ contains
     integer  :: dummyfilter(1)                         ! empty filter
     integer  :: nc                                     ! clump index
     character(len=32) :: subname='ch4'                 ! subroutine name
+    logical  :: found_nan_or_inf                       ! Flag for NaN/Inf checks
     !-----------------------------------------------------------------------
 
     SHR_ASSERT_ALL_FL((ubound(agnpp) == (/bounds%endp/)), sourcefile, __LINE__)
@@ -1853,6 +1854,38 @@ contains
 
       ! Adjustment to NEE for methane production - oxidation
       nem_col(begc:endc)           = 0._r8
+
+      ! ------------------------------------------------------------------------
+      ! JIK CHANGE FROM 2026-02-07: Check for NaNs/Inf in inputs
+      ! (Initial version suggested by Gemini Code Assist, inspected and edited manually)
+      ! ------------------------------------------------------------------------
+      found_nan_or_inf = .false.
+      do fc = 1, num_soilc
+         c = filter_soilc(fc)
+
+         ! Check SOMHR / LITHR
+         if (shr_infnan_isnan(soilbiogeochem_carbonflux_inst%somhr_col(c)) .or. &
+             shr_infnan_isnan(soilbiogeochem_carbonflux_inst%lithr_col(c))) then
+            write(iulog,*) 'CH4 ERROR: NaN detected in somhr or lithr. fc, column (c), somhr_col(c), lithr_col(c) = ', &
+                 fc, c, soilbiogeochem_carbonflux_inst%somhr_col(c), soilbiogeochem_carbonflux_inst%lithr_col(c)
+            found_nan_or_inf = .true.
+         end if
+
+         ! Check conc_ch4 state variables
+         do j = 1, nlevsoi
+            if (abs(ch4_inst%conc_ch4_sat_col(c,j)) > 1.e30_r8 .or. &
+                shr_infnan_isnan(ch4_inst%conc_ch4_sat_col(c,j))) then
+               write(iulog,*) 'CH4 ERROR: Infinity/Huge/NaN value in conc_ch4_sat for column fc,c = ',fc,c,' level j = ',j
+               found_nan_or_inf = .true.
+            end if
+            if (abs(ch4_inst%conc_ch4_unsat_col(c,j)) > 1.e30_r8 .or. &
+                shr_infnan_isnan(ch4_inst%conc_ch4_unsat_col(c,j))) then
+               write(iulog,*) 'CH4 ERROR: Infinity/Huge/NaN value in conc_ch4_unsat for column fc,c = ',fc,c, ' level j = ',j
+               found_nan_or_inf = .true.
+            end if
+         end do
+      end do
+      ! ------------------------------------------------------------------------
 
       do g= begg, endg
          if (ch4offline) then
