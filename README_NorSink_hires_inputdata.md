@@ -5,49 +5,51 @@ The following are notes and instructions for how to produce a high-resolution
 and input data for CLM/CTSM and accompanying models used in the project.
 
 ## Contents
-- [Definition of the grid](#definition-of-the-grid)
-- [Create the Python enironment](#create-the-python-enironment)
-- [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
-  - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
-    - [1.a Legacy method using `/tools/mkmapgrids/mkscripgrid.ncl`](#1a-legacy-method-using-toolsmkmapgridsmkscripgridncl)
-  - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
-  - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
-    - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
-    - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
-  - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
-    - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
-    - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
-    - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
-  - [5. Download missing raw input data](#5-download-missing-raw-input-data)
-    - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
-    - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
-  - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
-  - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
-  - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
-    - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
-    - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
-    - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
-- [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
-  - [1. Create the test case](#1-create-the-test-case)
-  - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
-    - [a. Force a cold start](#a-force-a-cold-start)
-    - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
-    - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
-    - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
-  - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
-  - [4. Build the case for run](#4-build-the-case-for-run)
-  - [5. Submit](#5-submit)
-- [Add and run with high-resolution ERA5 Land meteorological forcing data](#add-and-run-with-high-resolution-era5-land-meteorological-forcing-data)
-  - [1. Download the required ERA5 Land variables for the required region](#1-download-the-required-era5-land-variables-for-the-required-region)
-  - [2. Convert ERA5 Land grib files to DATM7 3-stream netCDF files](#2-convert-era5-land-grib-files-to-datm7-3-stream-netcdf-files)
-  - [3. Enter the new forcing data files in XML database files as new DATM streams](#3-enter-the-new-forcing-data-files-in-xml-database-files-as-new-datm-streams)
-    - [a. Add the mode and default settings for it in XML settings](#a-add-the-mode-and-default-settings-for-it-in-xml-settings)
-    - [b. Add streams for the mode in the namelist definition XML file](#b-add-streams-for-the-mode-in-the-namelist-definition-xml-file)
-    - [c. Define the streams and file locations / path patterns in the streams definition XML file](#c-define-the-streams-and-file-locations--path-patterns-in-the-streams-definition-xml-file)
-  - [4. Create and run a test case with the new forcing data](#4-create-and-run-a-test-case-with-the-new-forcing-data)
-    - [a. Create the case](#a-create-the-case)
-    - [b. Set XML options](#b-set-xml-options)
-    - [c. Build and submit](#c-build-and-submit)
+- [Steps to produce high-resolution grid and input data for NorSink](#steps-to-produce-high-resolution-grid-and-input-data-for-norsink)
+  - [Contents](#contents)
+  - [Definition of the grid](#definition-of-the-grid)
+  - [Create the Python enironment](#create-the-python-enironment)
+  - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
+    - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+      - [1.a Legacy method using `/tools/mkmapgrids/mkscripgrid.ncl`](#1a-legacy-method-using-toolsmkmapgridsmkscripgridncl)
+    - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
+    - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
+      - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
+      - [Add the prelminiary, nomask mesh file path to the nuopc component/model grid definition files](#add-the-prelminiary-nomask-mesh-file-path-to-the-nuopc-componentmodel-grid-definition-files)
+    - [4. Run scripts to prepare for running `mksurfdata_esmf`](#4-run-scripts-to-prepare-for-running-mksurfdata_esmf)
+      - [a. Compile the `mksurfdata` executable](#a-compile-the-mksurfdata-executable)
+      - [b. Create the namelist for `mksurfdata`](#b-create-the-namelist-for-mksurfdata)
+      - [c. Create job script for `mksurfdata`](#c-create-job-script-for-mksurfdata)
+    - [5. Download missing raw input data](#5-download-missing-raw-input-data)
+      - [a. Use (and optionally create) a dummy case directory](#a-use-and-optionally-create-a-dummy-case-directory)
+      - [b. Modify download and input file paths to get around missing write permissions](#b-modify-download-and-input-file-paths-to-get-around-missing-write-permissions)
+    - [6. Run `mksurfdata` to generate surface data and land use files](#6-run-mksurfdata-to-generate-surface-data-and-land-use-files)
+    - [7. Add land mask and grid cell areas to the mesh file](#7-add-land-mask-and-grid-cell-areas-to-the-mesh-file)
+    - [8. Move the generated files to inputdata folders and add to / adjust XML databases](#8-move-the-generated-files-to-inputdata-folders-and-add-to--adjust-xml-databases)
+      - [1. Move the surface data files to an appropriate input data folder](#1-move-the-surface-data-files-to-an-appropriate-input-data-folder)
+      - [2. Adjust the mask and mesh file config in the XML databases](#2-adjust-the-mask-and-mesh-file-config-in-the-xml-databases)
+      - [3. Add the paths to the generated surfacedata and land use files to the XML databases](#3-add-the-paths-to-the-generated-surfacedata-and-land-use-files-to-the-xml-databases)
+  - [Run a test case with the new CTSM input data (only)](#run-a-test-case-with-the-new-ctsm-input-data-only)
+    - [1. Create the test case](#1-create-the-test-case)
+    - [2. Check and adjust config parameters](#2-check-and-adjust-config-parameters)
+      - [a. Force a cold start](#a-force-a-cold-start)
+      - [b. Adjust the length of the run](#b-adjust-the-length-of-the-run)
+      - [c. Set output interval for history files](#c-set-output-interval-for-history-files)
+      - [d. Adjust start year and alignment year with forcing data](#d-adjust-start-year-and-alignment-year-with-forcing-data)
+    - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
+    - [4. Build the case for run](#4-build-the-case-for-run)
+    - [5. Submit](#5-submit)
+  - [Add and run with high-resolution ERA5 Land meteorological forcing data](#add-and-run-with-high-resolution-era5-land-meteorological-forcing-data)
+    - [1. Download the required ERA5 Land variables for the required region](#1-download-the-required-era5-land-variables-for-the-required-region)
+    - [2. Convert ERA5 Land grib files to DATM7 3-stream netCDF files](#2-convert-era5-land-grib-files-to-datm7-3-stream-netcdf-files)
+    - [3. Enter the new forcing data files in XML database files as new DATM streams](#3-enter-the-new-forcing-data-files-in-xml-database-files-as-new-datm-streams)
+      - [a. Add the mode and default settings for it in XML settings](#a-add-the-mode-and-default-settings-for-it-in-xml-settings)
+      - [b. Add streams for the mode in the namelist definition XML file](#b-add-streams-for-the-mode-in-the-namelist-definition-xml-file)
+      - [c. Define the streams and file locations / path patterns in the streams definition XML file](#c-define-the-streams-and-file-locations--path-patterns-in-the-streams-definition-xml-file)
+    - [4. Create and run a test case with the new forcing data](#4-create-and-run-a-test-case-with-the-new-forcing-data)
+      - [a. Create the case](#a-create-the-case)
+      - [b. Set XML options](#b-set-xml-options)
+      - [c. Build and submit](#c-build-and-submit)
 
 
 ## Definition of the grid
@@ -888,7 +890,7 @@ After having done this, you can inspect the various namelists and input file
 specifications that have been generated in the `Buildconf` directory under the
 case directory.
 
-### 5. Submit 
+### 5. Submit
 
 Submit the case as follows (with `--verbose` and especially `--debug` being
 optional):
@@ -932,6 +934,39 @@ NorSink is stored in
 `/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260120`
 (each stream in a separate subfolder, `Precip1Hrly`, `Solar1Hrly`, and
 `TPQWL1Hrly`)*
+
+The following paths (set as environment variables) and command were used to
+convert the ERA5 Land data for the NorwayRect_0.1x0.1 grid for NorSink on Betzy,
+after having activate the Python environment (`pixi shell`) in the
+era5land_to_datm repo:
+
+```
+ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink/original_GRIB_NorwayRect" \
+CONVERTED_DATM7_OUTPUTDIR=/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260216 \
+era5land_to_datm7_multiyearmonth \
+    --source-dir "${ERA5LAND_DATADIR}" \
+    --source-files 'era5land_d2m_sp_ssrd_strd_t2m_tp_u10_v10_{year:04d}_{month:02d}.grib' \
+    --output-dir "${CONVERTED_DATM7_OUTPUTDIR}" \
+    --output-files "clmforc.ERA5Land_NorwayRect0.1x0.1.{stream}.{year:04d}-{month:02d}.nc" \
+    --start-year-month 2019 01 \
+    --end-year-month 2019 12 \
+    --mask-file "${ERA5LAND_DATADIR}/era5_land_mask_rounded_coords.nc" \
+    --if-masked-values raise \
+    --if-unmasked-nulls warn \
+    --null-value-files "${ERA5LAND_DATADIR}/era5land_missing_data_locs_{year:04d}-{month:02d}.nc" \
+    --log-level INFO
+```
+
+The command above also added netCDF files that report the location of missing
+values in the unmasked land region in the original ERA5 Land data (through the
+pattern in the `--null-value-files` argument), which the conversion script
+filled by doing linear interpolation along the time dimension in the converted
+dataset. These files were placed in the same folder as the original ERA5 Land
+data files (given by the environment variable `$ERA5LAND_DATADIR`). If you rerun
+the command above, you can either omit the `--null-value-files` argument to
+avoid regenerating the files, or you need to change the path in the argument or
+move the original files (the script will not overwrite the originals and throw
+an error).
 
 ### 3. Enter the new forcing data files in XML database files as new DATM streams
 
