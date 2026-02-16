@@ -941,8 +941,10 @@ after having activate the Python environment (`pixi shell`) in the
 era5land_to_datm repo:
 
 ```
-ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink/original_GRIB_NorwayRect" \
-CONVERTED_DATM7_OUTPUTDIR=/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260216 \
+ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink/original_GRIB_NorwayRect"
+
+CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260216"
+
 era5land_to_datm7_multiyearmonth \
     --source-dir "${ERA5LAND_DATADIR}" \
     --source-files 'era5land_d2m_sp_ssrd_strd_t2m_tp_u10_v10_{year:04d}_{month:02d}.grib' \
