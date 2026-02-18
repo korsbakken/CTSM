@@ -1683,6 +1683,7 @@ contains
     use pftconMod     , only : noveg
     use ch4varcon     , only : replenishlakec, allowlakeprod, ch4offline
     use clm_varcon    , only : secspday
+    use clm_varctl    , only : glc_do_dynglacier, use_fates
     use ch4varcon     , only : finundation_mtd, finundation_mtd_h2osfc
     use clm_time_manager, only : is_beg_curr_year, is_first_step
     use dynSubgridControlMod, only : get_do_transient_lakes
@@ -1748,6 +1749,7 @@ contains
     integer  :: dummyfilter(1)                         ! empty filter
     integer  :: nc                                     ! clump index
     character(len=32) :: subname='ch4'                 ! subroutine name
+    logical  :: found_nan_or_inf                       ! Flag for NaN/Inf checks
     !-----------------------------------------------------------------------
 
     SHR_ASSERT_ALL_FL((ubound(agnpp) == (/bounds%endp/)), sourcefile, __LINE__)
@@ -1852,6 +1854,38 @@ contains
 
       ! Adjustment to NEE for methane production - oxidation
       nem_col(begc:endc)           = 0._r8
+
+      ! ------------------------------------------------------------------------
+      ! JIK CHANGE FROM 2026-02-07: Check for NaNs/Inf in inputs
+      ! (Initial version suggested by Gemini Code Assist, inspected and edited manually)
+      ! ------------------------------------------------------------------------
+      found_nan_or_inf = .false.
+      do fc = 1, num_soilc
+         c = filter_soilc(fc)
+
+         ! Check SOMHR / LITHR
+         if (shr_infnan_isnan(soilbiogeochem_carbonflux_inst%somhr_col(c)) .or. &
+             shr_infnan_isnan(soilbiogeochem_carbonflux_inst%lithr_col(c))) then
+            write(iulog,*) 'CH4 ERROR: NaN detected in somhr or lithr. fc, column (c), somhr_col(c), lithr_col(c) = ', &
+                 fc, c, soilbiogeochem_carbonflux_inst%somhr_col(c), soilbiogeochem_carbonflux_inst%lithr_col(c)
+            found_nan_or_inf = .true.
+         end if
+
+         ! Check conc_ch4 state variables
+         do j = 1, nlevsoi
+            if (abs(ch4_inst%conc_ch4_sat_col(c,j)) > 1.e30_r8 .or. &
+                shr_infnan_isnan(ch4_inst%conc_ch4_sat_col(c,j))) then
+               write(iulog,*) 'CH4 ERROR: Infinity/Huge/NaN value in conc_ch4_sat for column fc,c = ',fc,c,' level j = ',j
+               found_nan_or_inf = .true.
+            end if
+            if (abs(ch4_inst%conc_ch4_unsat_col(c,j)) > 1.e30_r8 .or. &
+                shr_infnan_isnan(ch4_inst%conc_ch4_unsat_col(c,j))) then
+               write(iulog,*) 'CH4 ERROR: Infinity/Huge/NaN value in conc_ch4_unsat for column fc,c = ',fc,c, ' level j = ',j
+               found_nan_or_inf = .true.
+            end if
+         end do
+      end do
+      ! ------------------------------------------------------------------------
 
       do g= begg, endg
          if (ch4offline) then
@@ -2328,9 +2362,13 @@ contains
       ! - the beginning of a new year (ok for restart runs) OR
       ! - the beginning of a simulation (needed for hybrid/startup runs)
       ! See (https://github.com/ESCOMP/CTSM/issues/43#issuecomment-1282609233)
-      ! 
+      ! Fates and cism-evolve have inconsistencies with area updates 
+      ! when switching from dglc to cism-evolve on the first glacier coupling period (1 year).
+      ! See https://github.com/NorESMhub/NorESM/issues/699
       if ( is_beg_curr_year() .and. get_do_transient_lakes() .or. &
-           is_first_step() .and. get_do_transient_lakes() )then
+           is_first_step() .and. get_do_transient_lakes() .or. &
+           ((use_fates .and. glc_do_dynglacier) .and. &
+            (is_beg_curr_year() .or. (is_first_step()))) )then
          ch4_first_time_grc(begg:endg) = .true.
       end if
 
@@ -3440,6 +3478,10 @@ contains
     ! for keeping concentrations always above zero
     real(r8) :: conc_ch4_bef(bounds%begc:bounds%endc,1:nlevsoi)            ! concentration at the beginning of the timestep
     real(r8) :: errch4(bounds%begc:bounds%endc)                            ! Error (Mol CH4 /m^2) [+ = too much CH4]
+    real(r8) :: errch4_soil_check(bounds%begc:bounds%endc)                 ! Added for debug. Remember the part of errch4 that is generated from summing over soil layers.
+    real(r8) :: conc_ch4_check(bounds%begc:bounds%endc)                    ! Added for debug. Keep track of total CH4 concentration in soil
+    real(r8) :: ch4_prod_check(bounds%begc:bounds%endc)                    ! Added for debug. Keep track of CH4 production per column
+    real(r8) :: ch4_oxid_check(bounds%begc:bounds%endc)                    ! Added for debug. Keep track of soil CH4 oxidation  per column
     real(r8) :: conc_ch4_rel(bounds%begc:bounds%endc,0:nlevsoi)            ! Concentration per volume of air or water
     real(r8) :: conc_o2_rel(bounds%begc:bounds%endc,0:nlevsoi)             ! Concentration per volume of air or water
     real(r8) :: conc_ch4_rel_old(bounds%begc:bounds%endc,0:nlevsoi)        ! Concentration during last Crank-Nich. loop
@@ -4161,10 +4203,21 @@ contains
          do fc = 1, num_methc
             c = filter_methc (fc)
 
-            if (j == 1) errch4(c) = 0._r8
+            if (j == 1) then
+               errch4(c) = 0._r8
+               conc_ch4_check(c) = 0._r8
+               ch4_prod_check(c) = 0._r8
+               ch4_oxid_check(c) = 0._r8
+               errch4_soil_check(c) = 0._r8
+            end if
             errch4(c) = errch4(c) + (conc_ch4(c,j) - conc_ch4_bef(c,j))*dz(c,j)
             errch4(c) = errch4(c) - ch4_prod_depth(c,j)*dz(c,j)*dtime
             errch4(c) = errch4(c) + ch4_oxid_depth(c,j)*dz(c,j)*dtime
+            ! DEBUG: Add up total CH4 concentration, production and oxidation across soil layers, to show in case of error.
+            errch4_soil_check(c) = errch4(c)
+            conc_ch4_check(c) = conc_ch4_check(c) + (conc_ch4(c,j) - conc_ch4_bef(c,j))*dz(c,j)
+            ch4_prod_check(c) = ch4_prod_check(c) - ch4_prod_depth(c,j)*dz(c,j)*dtime
+            ch4_oxid_check(c) = ch4_oxid_check(c) + ch4_oxid_depth(c,j)*dz(c,j)*dtime
          end do
       end do
 
@@ -4181,6 +4234,11 @@ contains
          else ! errch4 > 1e-8 mol / m^2 / timestep
             write(iulog,*)'CH4 Conservation Error in CH4Mod during diffusion, nstep, c, errch4 (mol /m^2.timestep)', &
                  nstep,c,errch4(c)
+            write(iulog,*)'errch4 from soil layers: ',errch4_soil_check(c)
+            write(iulog,*)'conc_ch4_check, ch4_prod_check, ch4_oxid_check = ', &
+                  conc_ch4_check(c),ch4_prod_check(c),ch4_oxid_check(c)
+            write(iulog,*)'ch4_surf_aere(c), ch4_surf_ebul(c), ch4_surf_diff(c), dtime = ', &
+                  ch4_surf_aere(c),ch4_surf_ebul(c),ch4_surf_diff(c),dtime
             g = col%gridcell(c)
             write(iulog,*)'Latdeg,Londeg=',grc%latdeg(g),grc%londeg(g)
             call endrun(subgrid_index=c, subgrid_level=subgrid_level_column, &

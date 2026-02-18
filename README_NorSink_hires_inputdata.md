@@ -8,8 +8,10 @@ and input data for CLM/CTSM and accompanying models used in the project.
 - [Steps to produce high-resolution grid and input data for NorSink](#steps-to-produce-high-resolution-grid-and-input-data-for-norsink)
   - [Contents](#contents)
   - [Definition of the grid](#definition-of-the-grid)
+  - [Create the Python enironment](#create-the-python-enironment)
   - [Create grid files and input data for CTSM](#create-grid-files-and-input-data-for-ctsm)
     - [1. Create the SCRIP grid file](#1-create-the-scrip-grid-file)
+      - [1.a Legacy method using `/tools/mkmapgrids/mkscripgrid.ncl`](#1a-legacy-method-using-toolsmkmapgridsmkscripgridncl)
     - [2. Create a (preliminary) mesh file with triival mask](#2-create-a-preliminary-mesh-file-with-triival-mask)
     - [3. Add new resolution and grid to config files](#3-add-new-resolution-and-grid-to-config-files)
       - [Add resolution name to CTSM namelist definition file](#add-resolution-name-to-ctsm-namelist-definition-file)
@@ -37,6 +39,17 @@ and input data for CLM/CTSM and accompanying models used in the project.
     - [3. Initialize the case with `case.setup`](#3-initialize-the-case-with-casesetup)
     - [4. Build the case for run](#4-build-the-case-for-run)
     - [5. Submit](#5-submit)
+  - [Add and run with high-resolution ERA5 Land meteorological forcing data](#add-and-run-with-high-resolution-era5-land-meteorological-forcing-data)
+    - [1. Download the required ERA5 Land variables for the required region](#1-download-the-required-era5-land-variables-for-the-required-region)
+    - [2. Convert ERA5 Land grib files to DATM7 3-stream netCDF files](#2-convert-era5-land-grib-files-to-datm7-3-stream-netcdf-files)
+    - [3. Enter the new forcing data files in XML database files as new DATM streams](#3-enter-the-new-forcing-data-files-in-xml-database-files-as-new-datm-streams)
+      - [a. Add the mode and default settings for it in XML settings](#a-add-the-mode-and-default-settings-for-it-in-xml-settings)
+      - [b. Add streams for the mode in the namelist definition XML file](#b-add-streams-for-the-mode-in-the-namelist-definition-xml-file)
+      - [c. Define the streams and file locations / path patterns in the streams definition XML file](#c-define-the-streams-and-file-locations--path-patterns-in-the-streams-definition-xml-file)
+    - [4. Create and run a test case with the new forcing data](#4-create-and-run-a-test-case-with-the-new-forcing-data)
+      - [a. Create the case](#a-create-the-case)
+      - [b. Set XML options](#b-set-xml-options)
+      - [c. Build and submit](#c-build-and-submit)
 
 
 ## Definition of the grid
@@ -88,6 +101,30 @@ to those listed above, while the grid corners on the edges have latitudes and/or
 longitudes 0.05 degrees beyond those values.
 
 
+## Create the Python enironment
+
+Some of the steps (including most steps that use CIME scripts and other Python
+code in the CTSM repo itself) require installing a custom Python environment.
+This can be done in several ways, but this repo utilizes the package manager
+[`pixi`](https://pixi.prefix.dev/latest/installation/), and specifies all
+dependencies in the file `pixi.toml` and exact installed environment in
+`pixi.lock` in the repo root.
+
+You can install the pixi environment specified in `pixi.toml` and `pixi.lock`
+and activate it with the following commands:
+```
+pixi install
+
+pixi -e dev shell
+```
+
+`pixi.toml` contains both the dependencies of the main CTSM Python environment
+as specified in [/python/conda_env_ctsm_py.yml](./python/conda_env_ctsm_py.yml)
+and some additional dependencies that are required for other steps in this
+guide (notably using
+[/tools/surfdat_landfrac_to_mesh_mask.py](./tools/surfdat_landfrac_to_mesh_mask/surfdat_landfrac_to_mesh_mask.py)
+to add a land mask and cell areas to the mesh file).
+
 ## Create grid files and input data for CTSM
 
 **NB!** The sections of the CTSM User Guide that deal with creating new grid
@@ -123,18 +160,66 @@ The current workflow appears to be:
 
 ### 1. Create the SCRIP grid file
 
-This step requires installing and activating the Python environment specified in
-`pixi.toml` and `pixi.lock` with the following commands:
+There are many ways to create a SCRIP file for a rectangular grid. The simplest
+approach, which also adds grid cell areas to the SCRIP file (not done in many
+other methods), is to use the `ncks --rgr` command in
+[NCO](https://nco.sourceforge.net). You need at least version 4.5.2. A legacy
+method using `/tools/mkmapgrids/mkscripgrid.ncl` in the CTSM repo is outlined
+below, but it does not give you grid cell areas, and we recommend using `ncks`
+instead.
 
-1. `pixi install`
-2. `pixi shell`
+We follow the approach documented in the section "[Grid
+Generation](https://nco.sourceforge.net/nco.html#Grid-Generation)" of the [NCO User Guide](https://nco.sourceforge.net/nco.html)
 
-`pixi.toml` contains both the dependencies of the main CTSM Python environment
-as specified in [/python/conda_env_ctsm_py.yml](./python/conda_env_ctsm_py.yml)
-and some additional dependencies that are required for other steps in this
-guide (notably using
-[/tools/surfdat_landfrac_to_mesh_mask.py](./tools/surfdat_landfrac_to_mesh_mask/surfdat_landfrac_to_mesh_mask.py)
-to add a land mask and cell areas to the mesh file).
+On betzy, you can use NCO by loading the NCO module:
+```
+module load NCO/5.1.9-foss-2023b-ESMF-8.8.0
+```
+(other versions of the same module may also work, as long as it's higher than
+4.5.2)
+
+The command below outputs a file named
+`SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260108.nc` for the rectangular grid
+covering Norway listed above. Adjust the name given in the `scrip=` option in
+the command below if desired. If you change the coordinates, the coordinates in
+the options `lat_sth` and `lon_wst` should be half a grid cell width west/south
+of the grid cell centers at the western/southern edge, and the coordinates in
+`lat_nrt` and `lat_est` correspondingly half a grid cell width north/east of the
+northern/western edges (i.e., they are grid cell edge coordinates, not the
+coordinates of the centers). `lat_nbr` and `lon_nbr` must be set to the number
+of grid cells (the number of centers) in the latitude and longitude direction
+(which determines the resolution). This will be given by
+$$$
+lat_nbr = \frac{lat_nrt - lat_sth}{resolution}
+$$$
+and similarly for `lon_nbr`, `lon_wst` and `lon_est`.
+
+The second-to-last command line argument is a dummy input netCDF file. It can be
+any netCDF file, the content will be ignored, but it is required for the `ncks`
+function to run. The final argument is similarly a dummy output file that will
+be created (and should not already exist), but will not have any meaningful
+content.
+```
+ncks \
+    --rgr grd_ttl="Rectangular 0.1x0.1 degree grid that covers Norway and outflowing rivers" \
+    --rgr scrip=SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260203.nc \
+    --rgr lat_typ=uni \
+    --rgr lon_typ=grn_ctr \
+    --rgr lat_nbr=151 \
+    --rgr lon_nbr=281 \
+    --rgr lat_drc=s2n \
+    --rgr lat_sth=56.95 \
+    --rgr lat_nrt=72.05 \
+    --rgr lon_wst=3.95 \
+    --rgr lon_est=32.05 \
+    dummy_in.nc dummy_out.nc
+```
+
+On betzy for NorSink, the SCRIP file was moved to the folder
+`/cluster/shared/noresm/inputdata/cicero_mods/share/scripgrids/` after having
+been created.
+
+#### 1.a Legacy method using `/tools/mkmapgrids/mkscripgrid.ncl`
 
 Creating the SCRIP grid file only requires the `ncl` package in the Python
 environment and its dependencies. But if you also want to use the packages in
@@ -161,12 +246,10 @@ On betzy, the SCRIP file was moved from `${CTSMROOT}/tools/mkmapgrids/` to
 ### 2. Create a (preliminary) mesh file with triival mask
 
 The SCRIP grid file from the previous file is used to produce a mesh file with a
-trivial mask (1 everywhere), and without a field for the grid cell areas (since
-the SCRIP file from the previous step does not contain one). We need a mesh file
-to create the surface data set, but the surface data contains its own land
-fraction data and does not need a mask. We will then later use the surface data
-set to add a land mask to the mesh file, and at the same time compute and add
-grid cell areas.
+trivial mask (1 everywhere). We need a mesh file to create the surface data set,
+but the surface data contains its own land fraction data and does not need a
+mask. We will then later use the surface data set to add a land mask to the mesh
+file.
 
 The preliminary mesh file is produced with the following commands, where
 `[ESMF_module]` is replaced with a suitable module that enables the
@@ -192,7 +275,7 @@ On betzy, the following commands were used after changing to the directory
 ```
 module load ESMF/8.8.0-iomkl-2022a-ParallelIO-2.6.5
 
-ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260108.nc ../meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc 0
+ESMF_Scrip2Unstruct ./SCRIPgrid_NorwayRect_0.1x0.1_nomask_c260203.nc ../meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260203.nc 0
 ```
 
 Note that if you get an error message about the ESMF module (or at least the
@@ -228,7 +311,7 @@ from point 2 in the `<domains>` section. The following tag was added on betzy
 ```
   <domain name="NorwayRect_0.1x0.1">
     <nx>281</nx>  <ny>151</ny>
-    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260108.nc</mesh>
+    <mesh>$DIN_LOC_ROOT/cicero_mods/share/meshes/ESMFmesh_NorwayRect_0.1x0.1_nomask_c260203.nc</mesh>
     <desc>0.1x0.1 degree rectangular grid containing Norway and all rivers that drain from Norway -- only valid for DATM/CLM compset</desc>
   </domain>
 ```
@@ -276,18 +359,36 @@ where this text was composed).
 
 #### b. Create the namelist for `mksurfdata`
 
+**NB!! The text here refers to the original version of
+`/tools/mksurfdata_esmf/gen_mksurfdata_namelist.xml` that was used in generating
+the surface dataset in late 2025. A new version was merged in on 2026-01-29,
+which contains changes that were merged into the noresm branch from the upstream
+ESCOMP/CTSM repo in NorESMHub/CTSM PR 178 (update to CTSM 5.4). The new version
+fixes the hardcoded paths to glade mentioned below, but also updates the files
+to new versions for CTSM 5.4. The surface data files have not yet been
+regenerated using the new raw data files as of 2026-01-28.**
+
 Assuming the new grid resolution and mesh file have been added to the XML files
 as described previously, the namelist used by `mksurfdata` can be generated with
 the following command (while in the directory `/tools/mksurfdata_esmf/`):
 
 ```
-./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.1x0.1 --rawdata-dir /cluster/shared/noresm/inputdata --inlandwet
+./gen_mksurfdata_namelist -v --start-year 1850 --end-year 2023 --res NorwayRect_0.1x0.1 --rawdata-dir /cluster/shared/noresm/inputdata
 ```
 
 Replace `NorwayRect_0.1x0.1` with the desired resolution name if using a
 different resolution or name, and the path after `--rawdata-dir` with the path
 to the root of the input data directory (`$DIN_LOC_ROOT`) if running on a
 different machine than betzy with a different input data path.
+
+**NB!** The command above produces a surface data set *with* detailed crop PFTs
+("78pfts") and *without* inland wetlands. In the first version of the surface
+data set generated in October/November 2025 and again in January 2026, both
+crops and inland wetlands were included. In February 2026, a new surface data
+set was generated, with the only difference being that the option for inland
+wetlands was set to false. To *include* inland wetlands, add the flag
+`--inlandwet` to the  `gen_mksurfdata_namelist` command. To *disable* detailed
+crop representation (generate a "16pfts" file), add the flag `--nocrop`.
 
 The command will output a file called `surfdata.namelist` in current directory.
 
@@ -666,7 +767,7 @@ with the name of your new grid if you chose a different name, and
 ```
 create_newcase \
   --case test_NorwayRect_simple_case \
-  --compset '1850_DATM%CRUJRA2024_CLM50%BGC_SICE_SOCN_MOSART_SGLC_SWAV' \
+  --compset '1850_DATM%CRUJRA2024_CLM50%BGC-CROP_SICE_SOCN_MOSART_SGLC_SWAV' \
   --res 'a%NorwayRect_0.1x0.1_l%NorwayRect_0.1x0.1_r%r05_g%null_oi%null_w%null_z%null_m%NorwayRect_0.1x0.1' \
   --machine betzy \
   --project nn9188k \
@@ -789,7 +890,7 @@ After having done this, you can inspect the various namelists and input file
 specifications that have been generated in the `Buildconf` directory under the
 case directory.
 
-### 5. Submit 
+### 5. Submit
 
 Submit the case as follows (with `--verbose` and especially `--debug` being
 optional):
@@ -801,3 +902,180 @@ Once the job starts, it should run for the number of days specified by the
 `STOP_N` parameter (can be inspected with `./xmlquery STOP_N` and changed with
 `./xmlchange STOP_N=n` prior to running `case.build`), or a corresponding number
 of months or other time unit if you changed `STOP_OPTION`.
+
+
+## Add and run with high-resolution ERA5 Land meteorological forcing data
+
+The setup so far can be run as-is with existing metorological forcing data. But
+to match the higher resolution of the new grid, you will need higher-resolution
+metorological data streams than what is provided out of the box with the main
+CESM input data.
+
+In NorSink, we used data from the ERA5 Land data. This was processed into the
+same variables and three-stream data file setup that is used by the standard
+CRUNCEP and CRUJRA data modes in the DATM data-model, at native 0.1-degree and
+1-hour resolution (i.e., we rely on standard CESM routines to downscale the data
+to the model time step resolution). The processed data were entered into the
+CIME XML databases so that they can be used to set up cases automatically with
+`create_newcase`, with DATM mode `ERA5LANDNorwayRect` (the `NorwayRect`
+identifier is used to make it clear that the data only covers the region used in
+NorSink).
+
+### 1. Download the required ERA5 Land variables for the required region
+
+### 2. Convert ERA5 Land grib files to DATM7 3-stream netCDF files
+
+*The procedure for downloading and converting the ERA5 Land files will be
+described here later. Both are done using custom-made Python code, in the
+package [`era5land_to_datm`](https://github.com/ciceroOslo/era5land_to_datm).*
+
+*On Betzy, the converted data for the 0.1-degree grid covering Norway for
+NorSink is stored in
+`/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260120`
+(each stream in a separate subfolder, `Precip1Hrly`, `Solar1Hrly`, and
+`TPQWL1Hrly`)*
+
+The following paths (set as environment variables) and command were used to
+convert the ERA5 Land data for the NorwayRect\_0.1x0.1 grid for NorSink on Betzy,
+after having activate the Python environment (`pixi shell`) in the
+era5land\_to\_datm repo:
+
+```
+ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink/original_GRIB_NorwayRect"
+
+CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260218"
+
+era5land_to_datm7_multiyearmonth \
+    --source-dir "${ERA5LAND_DATADIR}" \
+    --source-files 'era5land_d2m_sp_ssrd_strd_t2m_tp_u10_v10_{year:04d}_{month:02d}.grib' \
+    --output-dir "${CONVERTED_DATM7_OUTPUTDIR}" \
+    --output-files "clmforc.ERA5Land_NorwayRect0.1x0.1.{stream}.{year:04d}-{month:02d}.nc" \
+    --start-year-month 2019 01 \
+    --end-year-month 2019 12 \
+    --mask-file "${ERA5LAND_DATADIR}/era5_land_mask_rounded_coords.nc" \
+    --if-masked-values raise \
+    --if-unmasked-nulls warn \
+    --null-value-files "${ERA5LAND_DATADIR}/era5land_missing_data_locs_{year:04d}-{month:02d}.nc" \
+    --log-level INFO
+```
+
+The command above also added netCDF files that report the location of missing
+values in the unmasked land region in the original ERA5 Land data (through the
+pattern in the `--null-value-files` argument), which the conversion script
+filled by doing linear interpolation along the time dimension in the converted
+dataset. These files were placed in the same folder as the original ERA5 Land
+data files (given by the environment variable `$ERA5LAND_DATADIR`). If you rerun
+the command above, you can either omit the `--null-value-files` argument to
+avoid regenerating the files, or you need to change the path in the argument or
+move the original files (the script will not overwrite the originals and throw
+an error).
+
+### 3. Enter the new forcing data files in XML database files as new DATM streams
+
+To use the new files as a DATM mode in compset names when using
+`create_newcase`, they must be defined as a new mode, with three new data
+streams, and the files and various attributes for each of those streams. Do this
+by adding to each XML file as specified below (*only pointers to locations are
+given for now, will be amended, in the meantime use `git diff` to see what
+changed*):
+
+*NB! The tuning mode (XML config option `LND_TUNING_MODE`) should be set
+according to the meteorological forcing used. There are modes for CRUJRA, but
+it's currently unclear what we should for the ERA5 Land data. There are also
+modes with `era5` in the name, but it's unclear whether this is adapted for the
+ERA5 Land data that we have downloaded (and appropriate for the regional grid),
+or whether it's used for the pre-existing ERA5 DATM mode that might be based on
+other data.*
+
+#### a. Add the mode and default settings for it in XML settings
+
+In `/components/cdeps/datm/cime_config/config_component.xml`, add a mode
+with compset identifier `ERA5LAND-NORWAYRECT` and mode name
+`ERA5LAND_NORWAYRECT` and suitable description and settings for it under:
+* `<description modifier_mode="1">` (the compset identifier)
+* `<entry id="DATM_MODE">` (both as a valid value and in list of `<value>`
+  fields, mapping compset identifier to mode name)
+* `<entry id="DATM_YR_ALIGN">` (optional, but will probably need to be set
+  manually with `xmlchange` if not set. Requires specifying a compset pattern
+  match, which will include the compset identifier)
+* `<entry id="DATM_YR_START">`
+* `<entry id="DATM_YR_END">`
+
+In `/cime_config/config_component.xml` (the CTSM component config file), add
+tuning modes for the forcing data under `<entry id="LND_TUNING_MODE">`. We don't
+have separate tuning for the ERA5 Land data, but assume we can use the tuning
+for ERA5 data in general, i.e., set the tuning mode as `clmN_N_ERA5`, replacing
+`N_N` with the relevant CLM versions (4.5, 5.0, 6.0).
+
+#### b. Add streams for the mode in the namelist definition XML file
+
+In `/components/cdeps/datm/cime_config/namelist_definition.xml`:
+* add the mode as a value field `<value datm_mode="ERA5LAND_NORWAYRECT">` with
+streams `ERA5LAND_NORWAYRECT.Solar`, `ERA5LAND_NORWAYRECT.Precip`, and
+`ERA5LAND_NORWAYRECT.TPQW`.
+* add the mode as a valid mode in `valid_values` under `<entry id="datamode">`.
+
+#### c. Define the streams and file locations / path patterns in the streams definition XML file
+
+In `/components/cdeps/datm/cime_config/stream_definition.xml`, add a stream
+definition block (`<stream_entry name="...">`) for each of the three streams
+`ERA5LAND_NORWAYRECT.Solar`, `ERA5LAND_NORWAYRECT.Precip`, and
+`ERA5LAND_NORWAYRECT.TPQW`, with the correct path for each and file name
+patterns as follows:
+* `ERA5LAND_NORWAYRECT.Solar`: `clmforc.ERA5Land_NorwayRect0.1x0.1.Prec.%ym.nc`
+* `ERA5LAND_NORWAYRECT.Precip`: `clmforc.ERA5Land_NorwayRect0.1x0.1.Solr.%ym.nc`
+* `ERA5LAND_NORWAYRECT.TPQW`: `clmforc.ERA5Land_NorwayRect0.1x0.1.TPQWL.%ym.nc`
+
+
+### 4. Create and run a test case with the new forcing data
+
+Repeat the [previous steps for creating and running a test
+case](#run-a-test-case-with-the-new-ctsm-input-data-only) but with options
+adjusted for using the new high-resolution metorological forcing. Below we
+mostly just list the commands and options to use, see each subsection of ["Run a
+test case with the new CTSM input data
+(only)"](#run-a-test-case-with-the-new-ctsm-input-data-only) above for
+more detailed descriptions. If you change any names or options used at any step,
+make sure to check whether later steps also need to be modified.
+
+#### a. Create the case
+
+In the parent directory where you want your case directory:
+```
+create_newcase \
+  --case test_NorwayRect_with_era5land_forcing \
+  --compset '1850_DATM%ERA5LAND-NORWAYRECT_CLM50%BGC_SICE_SOCN_MOSART_SGLC_SWAV' \
+  --res 'a%NorwayRect_0.1x0.1_l%NorwayRect_0.1x0.1_r%r05_g%null_oi%null_w%null_z%null_m%NorwayRect_0.1x0.1' \
+  --machine betzy \
+  --project nn9188k \
+  --run-unsupported \
+  --walltime '0:45:00'
+```
+
+#### b. Set XML options
+
+In the case directory created in the previous step:
+```
+./xmlchange CLM_FORCE_COLDSTART=on
+
+./xmlchange STOP_OPTION=nmonths
+./xmlchange STOP_N=3
+
+./xmlchange HIST_OPTION=nmonths
+./xmlchange HIST_N=1
+
+./xmlchange RUN_STARTDATE=2019-01-01
+./xmlchange DATM_YR_START=2019
+./xmlchange DATM_YR_ALIGN=2019
+./xmlchange DATM_YR_END=2019
+```
+
+#### c. Build and submit
+
+In the case directory, after inspecting files and checking that things look
+right:
+```
+./case.setup --verbose
+./case.build --verbose --debug
+./case.submit --verbose --debug
+```
