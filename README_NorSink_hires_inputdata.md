@@ -936,14 +936,14 @@ NorSink is stored in
 `TPQWL1Hrly`)*
 
 The following paths (set as environment variables) and command were used to
-convert the ERA5 Land data for the NorwayRect_0.1x0.1 grid for NorSink on Betzy,
+convert the ERA5 Land data for the NorwayRect\_0.1x0.1 grid for NorSink on Betzy,
 after having activate the Python environment (`pixi shell`) in the
-era5land_to_datm repo:
+era5land\_to\_datm repo:
 
 ```
 ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink/original_GRIB_NorwayRect"
 
-CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260216"
+CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260218"
 
 era5land_to_datm7_multiyearmonth \
     --source-dir "${ERA5LAND_DATADIR}" \
