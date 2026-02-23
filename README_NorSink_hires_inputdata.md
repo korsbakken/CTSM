@@ -943,20 +943,24 @@ era5land\_to\_datm repo:
 ```
 ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink/original_GRIB_NorwayRect"
 
-CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260218"
+CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260223"
 
+CONVERT_YEAR=2023
+
+LOG_FILE="${CONVERTED_DATM7_OUTPUTDIR}/era5land_to_datm7_conversion_${CONVERT_YEAR}-01--12.log"
 era5land_to_datm7_multiyearmonth \
     --source-dir "${ERA5LAND_DATADIR}" \
     --source-files 'era5land_d2m_sp_ssrd_strd_t2m_tp_u10_v10_{year:04d}_{month:02d}.grib' \
     --output-dir "${CONVERTED_DATM7_OUTPUTDIR}" \
     --output-files "clmforc.ERA5Land_NorwayRect0.1x0.1.{stream}.{year:04d}-{month:02d}.nc" \
-    --start-year-month 2019 01 \
-    --end-year-month 2019 12 \
+    --start-year-month "${CONVERT_YEAR}" 01 \
+    --end-year-month "${CONVERT_YEAR}" 12 \
     --mask-file "${ERA5LAND_DATADIR}/era5_land_mask_rounded_coords.nc" \
     --if-masked-values raise \
     --if-unmasked-nulls warn \
     --null-value-files "${ERA5LAND_DATADIR}/era5land_missing_data_locs_{year:04d}-{month:02d}.nc" \
-    --log-level INFO
+    --log-level DEBUG \
+    2>&1 | tee "${LOG_FILE}"
 ```
 
 The command above also added netCDF files that report the location of missing
