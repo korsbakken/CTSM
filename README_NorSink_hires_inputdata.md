@@ -945,13 +945,13 @@ ERA5LAND_DATADIR="/cluster/shared/noresm/inputdata/cicero_mods/ERA5-Land_NorSink
 
 CONVERTED_DATM7_OUTPUTDIR="/cluster/shared/noresm/inputdata/cicero_mods/atm/datm7/atm_forcing.datm7.ERA5LAND_NORWAYRECT.0.1d.c20260223"
 
-START_YEAR=2017
+START_YEAR=2010
 START_MONTH=01
-END_YEAR=2018
+END_YEAR=2016
 END_MONTH=12
 
 LOG_FILE="${CONVERTED_DATM7_OUTPUTDIR}/era5land_to_datm7_conversion_${START_YEAR}-${START_MONTH}--${END_YEAR}-${END_MONTH}.log"
-srun --qos devel --time "00:15:00" --account nn9188k "era5land_to_datm7_multiyearmonth" \
+srun --qos devel --time "00:45:00" --account nn9188k "era5land_to_datm7_multiyearmonth" \
     --source-dir "${ERA5LAND_DATADIR}" \
     --source-files 'era5land_d2m_sp_ssrd_strd_t2m_tp_u10_v10_{year:04d}_{month:02d}.grib' \
     --output-dir "${CONVERTED_DATM7_OUTPUTDIR}" \
