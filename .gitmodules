@@ -93,7 +93,7 @@ fxDONOTUSEurl = https://github.com/NorESMhub/CMEPS.git
 path = components/cdeps
 # url = https://github.com/NorESMhub/CDEPS.git
 url = https://github.com/korsbakken/CDEPS.git
-fxtag = norsink_era5land_2017_2023
+fxtag = norsink_era5land_1951_2023
 fxrequired = ToplevelRequired
 # Standard Fork to compare to with "git fleximod test" to ensure personal forks aren't committed
 fxDONOTUSEurl = https://github.com/NorESMhub/CDEPS.git
