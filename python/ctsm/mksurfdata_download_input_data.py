@@ -73,7 +73,7 @@ Script to download any missing input data for mksurfdata_esmf
             "of that class to run. The content of the case directory does not "
             "matter, as long as long as it is a valid case for the host "
             "machine."
-        )
+        ),
     )
     parser.add_argument(
         "--rundir",
