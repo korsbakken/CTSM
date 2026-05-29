@@ -71,7 +71,7 @@ url = https://github.com/ciceroOslo/ccs_config_noresm_norsink_hires_inputdata
 fxtag = norsink_inputdata_merge_ccs_config_noresm0.0.69
 fxrequired = ToplevelRequired
 # Standard Fork to compare to with "git fleximod test" to ensure personal forks aren't committed
-fxDONOTUSEurl = https://github.com/NorESMhub/ccs_config_noresm
+fxDONOTUSEurl = https://github.com/ciceroOslo/ccs_config_noresm_norsink_hires_inputdata
 
 [submodule "cime"]
 path = cime
@@ -96,7 +96,7 @@ url = https://github.com/ciceroOslo/CDEPS_noresm_norsink_hires_inputdata.git
 fxtag = norsink_inputdata_merge_cdeps1.0.88_noresm_v2
 fxrequired = ToplevelRequired
 # Standard Fork to compare to with "git fleximod test" to ensure personal forks aren't committed
-fxDONOTUSEurl = https://github.com/NorESMhub/CDEPS.git
+fxDONOTUSEurl = https://github.com/ciceroOslo/CDEPS_noresm_norsink_hires_inputdata.git
 
 [submodule "share"]
 path = share
