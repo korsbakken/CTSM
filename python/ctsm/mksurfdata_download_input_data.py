@@ -32,10 +32,7 @@ def main():
     download_input_data(rundir=args.rundir, dummycasedir=args.dummycasedir)
 
 
-def download_input_data(
-        rundir,
-        dummycasedir,
-):
+def download_input_data(rundir, dummycasedir):
     """Implementation of the download_input_data command
 
     Args:
