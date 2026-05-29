@@ -343,12 +343,8 @@ CONTAINS
             !map CLM veg type into Wesely veg type
             wesveg = wveg_unset
             clmveg     = patch%itype(pi) ! this will be spval if fates is on.
-            if(use_fates)then
-               if(patch%is_fates(pi))then
-                  wesveg = wesley_veg_index(pi)
-               else
-                  wesveg = 8 !make bare ground for non-fates patches. Some of these are overwritten below.
-               endif
+            if (patch%is_fates(pi))then
+               wesveg = wesley_veg_index(pi)
             else
                if (clmveg == noveg                               ) wesveg = 8
                if (clmveg == ndllf_evr_tmp_tree                  ) wesveg = 5
@@ -380,9 +376,15 @@ CONTAINS
             
 
              if(wesveg<0 .or. wesveg>11 )then
-                call endrun(subgrid_index=pi, subgrid_level=subgrid_level_patch, &
-                    msg='ERROR: No sensible Wesley vegetation type'//&
-                    errMsg(sourcefile, __LINE__))
+                if (use_fates) then
+                   call endrun(subgrid_index=pi, subgrid_level=subgrid_level_patch, &
+                        msg='ERROR: FATES could not determine Wesley vegetation type'//&
+                        errMsg(sourcefile, __LINE__))
+                else
+                   call endrun(subgrid_index=pi, subgrid_level=subgrid_level_patch, &
+                        msg='ERROR: No sensible Wesley vegetation type '//&
+                        errMsg(sourcefile, __LINE__))
+                endif
              endif
             ! create seasonality index used to index wesely data tables from LAI,  Bascially
             !if elai is between max lai from input data and half that max the index_season=1
@@ -433,7 +435,7 @@ CONTAINS
                if(patch%is_fates(pi))then
                   index_season = wesley_season_index(pi)
                else
-                  index_season = 2 !set intermediate spring seson for bare ground. (as for urban)
+                  index_season = 3 !set bare autumn season for bare ground
                endif
                
             else ! not fates

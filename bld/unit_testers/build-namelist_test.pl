@@ -42,7 +42,9 @@ sub make_env_run {
     my %settings = @_;
 
     # Set default settings
-    my %env_vars = ( DIN_LOC_ROOT=>"MYDINLOCROOT", GLC_TWO_WAY_COUPLING=>"FALSE",  LND_SETS_DUST_EMIS_DRV_FLDS=>"TRUE", NEONSITE=>"", PLUMBER2SITE=>"", CLM_CMIP_ERA=>"cmip7" );
+    my %env_vars = ( DIN_LOC_ROOT=>"MYDINLOCROOT", GLC_TWO_WAY_COUPLING=>"FALSE",
+                     LND_SETS_DUST_EMIS_DRV_FLDS=>"TRUE", NEONSITE=>"", PLUMBER2SITE=>"",
+                     CLM_CMIP_ERA=>"cmip7", CLM_NDEP_FROM_CPL=>"FALSE" );
     # Set any settings that came in from function call
     foreach my $item ( keys(%settings) ) {
        $env_vars{$item} = $settings{$item};
@@ -163,7 +165,7 @@ my $testType="namelistTest";
 #
 # Figure out number of tests that will run
 #
-my $ntests = 3405;
+my $ntests = 3406;
 
 if ( defined($opts{'compare'}) ) {
    $ntests += 2061;
@@ -845,6 +847,11 @@ my %failtest = (
                                      namelst=>"stream_fldfilename_atm_c14='/dev/null'",
                                      phys=>"clm6_0",
                                    },
+     "c14_meshfile_none"         =>{ options=>"-envxml_dir . -bgc bgc",
+                                     namelst=>"stream_fldfilename_atm_c14='/dev/null', " .
+                                              "stream_meshfile_atm_c14='none'",
+                                     phys=>"clm6_0",
+                                   },
      "lightres no cn"            =>{ options=>"-bgc sp -envxml_dir . -light_res 360x720",
                                      namelst=>"",
                                      phys=>"clm5_0",
@@ -1144,8 +1151,12 @@ my %failtest = (
                                      namelst=>"use_fun=TRUE",
                                      phys=>"clm6_0",
                                    },
-     "useFATESWOsuplnitro"       =>{ options=>"--bgc fates --envxml_dir . --no-megan",
-                                     namelst=>"suplnitro='NONE'",
+     "useFATESCwsuplnNONE"       =>{ options=>"--bgc fates --envxml_dir . --no-megan",
+                                     namelst=>"suplnitro='NONE', fates_parteh_mode='carbon_only'",
+                                     phys=>"clm6_0",
+                                   },
+     "useFATESCNwuse_fates_sp"   =>{ options=>"--bgc fates --envxml_dir . --no-megan",
+                                     namelst=>"use_fates_sp = TRUE, fates_parteh_mode='carbon_nitrogen'",
                                      phys=>"clm6_0",
                                    },
      "FATESwBothSpST3"           =>{ options=>"--bgc fates --envxml_dir . --no-megan",
@@ -1199,6 +1210,10 @@ my %failtest = (
      "useFATESLUH2fileDNE"       =>{ options=>"-bgc fates -envxml_dir . -no-megan",
                                      namelst=>"use_fates_luh=.true., fluh_timeseries='zztop'",
                                      phys=>"clm4_5",
+                                   },
+     "useFATESLUH2invalidlogic"  =>{ options=>"-bgc fates -envxml_dir . -no-megan",
+                                     namelst=>"use_fates_luh=.true., fates_lu_transition_logic=0",
+                                     phys=>"clm6_0",
                                    },
      "useMEGANwithFATES"         =>{ options=>"-bgc fates -envxml_dir . -megan",
                                      namelst=>"",
@@ -1259,6 +1274,10 @@ my %failtest = (
      "useMeierwithFATES"         =>{ options=>"-bgc fates -envxml_dir . -no-megan",
                                      namelst=>"z0param_method=Meier2022",
                                      phys=>"clm5_0",
+                                   },
+     "FATES_w_irrig"              =>{ options=>"-envxml_dir . -res 0.9x1.25 -bgc fates -use_case 20thC_transient",
+                                     namelst=>"irrigate=T",
+                                     phys=>"clm6_0",
                                    },
      "noanthro_w_crop"            =>{ options=>"-envxml_dir . -res 0.9x1.25 -bgc bgc -crop -use_case 1850_noanthro_control",
                                      namelst=>"",
@@ -1411,7 +1430,7 @@ foreach my $key ( keys(%failtest) ) {
    my $options  = $failtest{$key}{"options"};
    my $namelist = $failtest{$key}{"namelst"};
    my %settings;
-   foreach my $xmlvar ( "GLC_TWO_WAY_COUPLING", "LND_SETS_DUST_EMIS_DRV_FLDS", "CLM_CMIP_ERA") {
+   foreach my $xmlvar ( "GLC_TWO_WAY_COUPLING", "LND_SETS_DUST_EMIS_DRV_FLDS", "CLM_CMIP_ERA", "CLM_NDEP_FROM_CPL") {
       if ( defined($failtest{$key}{$xmlvar}) ) {
          $settings{$xmlvar} = $failtest{$key}{$xmlvar};
       }
@@ -1446,11 +1465,6 @@ my %warntest = (
      "soilm_stream w transient"  =>{ options=>"-res 0.9x1.25 -envxml_dir . -use_case 20thC_transient",
                                      namelst=>"use_soil_moisture_streams=T,soilm_tintalgo='linear'",
                                      phys=>"clm5_0",
-                                   },
-     "c14_meshfile_none"         =>{ options=>"-envxml_dir . -bgc bgc",
-                                     namelst=>"stream_fldfilename_atm_c14='/dev/null', " .
-                                              "stream_meshfile_atm_c14='none'",
-                                     phys=>"clm6_0",
                                    },
      "missing_ndep_file"         =>{ options=>"-envxml_dir . -bgc bgc -ssp_rcp SSP5-3.4",
                                      namelst=>"",

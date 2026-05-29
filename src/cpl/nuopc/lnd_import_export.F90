@@ -26,6 +26,7 @@ module lnd_import_export
   use lnd_import_export_utils , only : check_for_errors, check_for_nans
   use subgridAveMod           , only : c2g
   use SoilBiogeochemNitrogenFluxType, only : soilbiogeochem_nitrogenflux_type
+  use abortutils              , only : endrun
 
   implicit none
   private ! except
@@ -399,10 +400,19 @@ contains
 
     ! from atm - nitrogen deposition
     call shr_ndep_readnl("drv_flds_in", ndep_nflds)
-    if (ndep_nflds > 0) then
+    if ( ndep_nflds == 0 )then
+       if ( masterproc ) write(iulog,*) 'Nitrogen Deposition will be read in by CTSM'
+    else if (ndep_nflds == 2) then
        call fldlist_add(fldsToLnd_num, fldsToLnd, Faxa_ndep, ungridded_lbound=1, ungridded_ubound=ndep_nflds)
        ! This sets a variable in clm_varctl
        ndep_from_cpl = .true.
+       if ( masterproc ) then
+         write(iulog,*) 'Nitrogen Deposition is coming from the ATM model'
+       end if
+    else
+       write(iulog,*) 'ndep_fields = ', ndep_nflds
+       write(iulog,*) 'The number of ndep fields must be either 0 (to use datasets in CTSM) or 2 (to use fields from the ATM model)'
+       call endrun(msg="Invalid number of ndep fields, change ndep_list in the drv_flds_in namelist", line=__LINE__, file=u_FILE_u)
     end if
 
     ! from atm - co2 exchange scenarios
@@ -1383,7 +1393,6 @@ contains
     ! ----------------------------------------------------
     use ESMF             , only : ESMF_VMGetCurrent, ESMF_VMBroadcast, ESMF_VM
     use clm_nlUtilsMod   , only : find_nlgroup_name
-    use abortutils       , only : endrun
     use shr_log_mod      , only : errMsg => shr_log_errMsg
     ! !ARGUMENTS:
     character(len=*), intent(IN) :: NLFilename   ! Namelist filename

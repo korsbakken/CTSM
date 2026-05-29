@@ -30,6 +30,7 @@ module clm_driver
   !
   use dynSubgridDriverMod    , only : dynSubgrid_driver, dynSubgrid_wrapup_weight_changes
   use BalanceCheckMod        , only : WaterGridcellBalance, BeginWaterColumnBalance, BalanceCheck
+  use BalanceCheckMod        , only : EnergyBalanceCheck
   !
   use BiogeophysPreFluxCalcsMod  , only : BiogeophysPreFluxCalcs
   use SurfaceHumidityMod     , only : CalculateSurfaceHumidity
@@ -119,6 +120,7 @@ contains
     use FATESFireFactoryMod   , only : scalar_lightning
     use FatesInterfaceTypesMod, only : fates_dispersal_cadence_none
     use CIsoAtmTimeseriesMod, only : C14BombSpike, C13TimeSeries
+    use shr_log_mod, only : errMsg => shr_log_errMsg
     !
     ! !ARGUMENTS:
     implicit none
@@ -821,6 +823,12 @@ contains
 
        if (irrigate) then
 
+          if (use_fates) then
+             call endrun(msg=' ERROR: Can not have ' // &
+                             'use_fates = .true. and irrigate = .true. ' // &
+                             'Set one of them to .false. in your user_nl_clm. ' // &
+                             errMsg(sourcefile, __LINE__))
+          endif
           ! ============================================================================
           ! Determine irrigation needed for future time steps
           ! ============================================================================
@@ -1116,8 +1124,8 @@ contains
 
        ! Dry Deposition of chemical tracers (Wesely (1998) parameterizaion)
        !  TODO PUT FAteS DRYDEP wrapper here
-       if(use_fates.and. n_drydep >0)then
-          call clm_fates%wrap_drydep(nc, drydepvel_inst)
+       if (use_fates .and. n_drydep >0)then
+          call clm_fates%wrap_drydep(nc,water_inst%waterdiagnosticbulk_inst, drydepvel_inst)
        end if 
        call t_startf('depvel')
        call depvel_compute(bounds_clump, &
@@ -1183,7 +1191,8 @@ contains
 
           call clm_fates%wrap_update_hifrq_hist(bounds_clump, &
                soilbiogeochem_carbonflux_inst, &
-               soilbiogeochem_carbonstate_inst)
+               soilbiogeochem_carbonstate_inst, &
+               solarabs_inst, energyflux_inst, temperature_inst)
 
 
           if( is_beg_curr_day() ) then
@@ -1271,6 +1280,9 @@ contains
           deallocate(agnpp_patch, bgnpp_patch, annsum_npp_patch, rr_patch)
           call t_stopf('ch4')
        end if
+
+       call EnergyBalanceCheck(bounds_clump, atm2lnd_inst, solarabs_inst, surfalb_inst, &
+            energyflux_inst, canopystate_inst, water_inst%waterdiagnosticbulk_inst)
 
        ! ============================================================================
        ! Determine albedos for next time step

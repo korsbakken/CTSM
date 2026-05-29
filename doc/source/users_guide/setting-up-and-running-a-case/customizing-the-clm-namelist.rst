@@ -36,7 +36,7 @@ Below we will give examples of user namelists that activate different commonly u
 The default namelist
 --------------------
 
-Here we give the default namelist as it would be created for an "I1850Clm50BgcCropCru" compset at 0.9x1.25 resolution with a gx1v7 land-mask on cheyenne. To edit the namelist you would edit the ``user_nl_clm`` user namelist with just the items you want to change. For simplicity we will just show the CLM namelist and NOT the entire file. In the sections below, for simplicity we will just show the user namelist (``user_nl_clm``) that will add (or modify existing) namelist items to the namelist.
+Here we give the default namelist as it would be created for an "I1850Clm50BgcCropCru" compset at 0.9x1.25 resolution with a gx1v7 land-mask on derecho. To edit the namelist you would edit the ``user_nl_clm`` user namelist with just the items you want to change. For simplicity we will just show the CLM namelist and NOT the entire file. In the sections below, for simplicity we will just show the user namelist (``user_nl_clm``) that will add (or modify existing) namelist items to the namelist.
 
 Example 1-2. Default CLM Namelist
 ---------------------------------
@@ -90,7 +90,9 @@ Example 1-2. Default CLM Namelist
 Adding/removing fields on your primary history file
 ---------------------------------------------------
 
-The primary history files are output monthly, and contain an extensive list of fieldnames, but the list of fieldnames can be added to using ``hist_fincl1`` or removed from by adding fieldnames to ``hist_fexcl1``. A sample user namelist ``user_nl_clm`` adding few new fields (cosine of solar zenith angle, and solar declination) and excluding a few standard fields is (ground temperature, vegetation temperature, soil temperature and soil water).:
+The primary history files are output monthly and contain an extensive list of fieldnames, but the list of fieldnames can be added to using ``hist_fincl1`` or removed from by adding fieldnames to ``hist_fexcl1``. For maximum output, ``hist_all_fields`` will enable all fieldnames on the primary history file.
+
+A sample user namelist ``user_nl_clm`` adding few new fields (cosine of solar zenith angle, and solar declination) and excluding a few standard fields is (ground temperature, vegetation temperature, soil temperature and soil water).:
 
 Example 1-3. Example user_nl_clm namelist adding and removing fields on primary history file
 --------------------------------------------------------------------------------------------
